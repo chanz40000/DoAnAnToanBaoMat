@@ -7,11 +7,14 @@ package util;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
-
-
-
+import model.Order;
+import model.OrderDetail;
+import model.Product;
+import model.User;
 
 
 /**
@@ -99,6 +102,11 @@ public class Email {
 			e.printStackTrace();
 		}
 	}
+
+
+
+
+
 	public static void main(String[] args) {
 
 
