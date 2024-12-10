@@ -130,12 +130,12 @@
     <div class="loader"></div>
 </div>
 <jsp:include page="navbar.jsp"/>
-<jsp:useBean id="orderDetailDAO" class="database.OrderDetailDAO"/>
-<jsp:useBean id="orderDAO" class="database.OrderDAO"/>
-<jsp:useBean id="userDAO" class="database.UserDAO"/>
-<c:set var="id" value="${sessionScope.userC.userId}"/>
-<c:set var="user" value="${userDAO.selectById(id)}"/>
-<c:set var="Orders" value="${sessionScope.order.orderId}"/>
+<%--<jsp:useBean id="orderDetailDAO" class="database.OrderDetailDAO"/>--%>
+<%--<jsp:useBean id="orderDAO" class="database.OrderDAO"/>--%>
+<%--<jsp:useBean id="userDAO" class="database.UserDAO"/>--%>
+<%--<c:set var="id" value="${sessionScope.userC.userId}"/>--%>
+<%--<c:set var="user" value="${userDAO.selectById(id)}"/>--%>
+<%--<c:set var="Orders" value="${sessionScope.order.orderId}"/>--%>
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-section set-bg" data-setbg="img/hinhnen.png">
     <div class="container">
