@@ -3,26 +3,26 @@ package model;
 import java.sql.Date;
 
 public class KeyUser {
-    int user_id;
+    User user;
     String key;
     Date create_at;
     Date expired_at;
     String status;
 
-    public KeyUser(int user_id, String key, Date create_at, Date expired_at, String status) {
-        this.user_id = user_id;
+    public KeyUser(User user_id, String key, Date create_at, Date expired_at, String status) {
+        this.user = user_id;
         this.key = key;
         this.create_at = create_at;
         this.expired_at = expired_at;
         this.status = status;
     }
 
-    public int getUser_id() {
-        return user_id;
+    public User getUser_id() {
+        return user;
     }
 
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    public void setUser_id(User user_id) {
+        this.user = user_id;
     }
 
     public String getKey() {
