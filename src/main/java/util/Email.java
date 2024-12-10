@@ -102,6 +102,110 @@ public class Email {
 			e.printStackTrace();
 		}
 	}
+	public String sendNotify(User user, Order order, List<OrderDetail> orderDetails) {
+		// Định dạng giá trị tiền
+		DecimalFormat df = new DecimalFormat("#,###");
+		String formattedPrice = df.format(order.getTotalPrice()).replace(",", ".");
+
+		String htmlCode = "<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"<head>\n" +
+				"    <title>Đơn hàng</title>\n" +
+				"    <style>\n" +
+				"        body {\n" +
+				"            font-family: Arial, sans-serif;\n" +
+				"            margin: 20px;\n" +
+				"        }\n" +
+				"        h1 {\n" +
+				"            margin-bottom: 10px;\n" +
+				"        }\n" +
+				"        table {\n" +
+				"            width: 100%;\n" +
+				"            border-collapse: collapse;\n" +
+				"            margin-bottom: 20px;\n" +
+				"        }\n" +
+				"        th, td {\n" +
+				"            border: 1px solid #ccc;\n" +
+				"            padding: 8px;\n" +
+				"            text-align: center; /* Canh giữa dữ liệu */\n" +
+				"        }\n" +
+				"        th {\n" +
+				"            background-color: #f2f2f2;\n" +
+				"            font-weight: bold;\n" +
+				"        }\n" +
+				"        tr:nth-child(even) {\n" +
+				"            background-color: #f9f9f9;\n" +
+				"        }\n" +
+				"        tr:hover {\n" +
+				"            background-color: #e6e6e6;\n" +
+				"        }\n" +
+				"    </style>\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"    <h6>Chúng tôi nhận thấy thông tin đơn hàng bị sai thông tin do ai đó đã sửa thông tin do đó đơn hàng đã bị huỷ hoặc sẽ có chính sách hoàn tiền. Thông tin:</h6>\n" +
+				"    <h2>Thông tin khách hàng</h2>\n" +
+				"    <table>\n" +
+				"        <tr>\n" +
+				"            <th>Tên khách hàng</th>\n" +
+				"            <th>Địa chỉ</th>\n" +
+				"            <th>Số điện thoại</th>\n" +
+				"            <th>Email</th>\n" +
+				"        </tr>\n" +
+				"        <tr>\n" +
+				"            <td>" + user.getName() + "</td>\n" +
+				"            <td>" + order.getAddress() + "</td>\n" +
+				"            <td>" + user.getPhone() + "</td>\n" +
+				"            <td>" + user.getEmail() + "</td>\n" +
+				"        </tr>\n" +
+				"    </table>\n" +
+				"\n" +
+				"    <h2>Thông tin người giao</h2>\n" +
+				"    <table>\n" +
+				"        <tr>\n" +
+				"            <th>Tên người giao</th>\n" +
+				"            <th>Số điện thoại</th>\n" +
+				"            <th>Tên công ty</th>\n" +
+				"            <th>Địa chỉ</th>\n" +
+				"        </tr>\n" +
+				"        <tr>\n" +
+				"            <td>Nguyễn Dư Lập</td>\n" +
+				"            <td>0867415853</td>\n" +
+				"            <td>Doraemon</td>\n" +
+				"            <td>Đại Học Nông Lâm tp.HCM</td>\n" +
+				"        </tr>\n" +
+				"    </table>\n" +
+				"\n" +
+				"    <h2>Thông tin đơn hàng</h2>\n" +
+				"    <table>\n" +
+				"        <tr>\n" +
+				"            <th>Mã sản phẩm</th>\n" +
+				"            <th>Số lượng</th>\n" +
+				"            <th>Tên sản phẩm</th>\n" +
+				"            <th>Ghi chú</th>\n" +
+				"        </tr>\n";
+
+		for (OrderDetail orderDetail : orderDetails) {
+			Product product = orderDetail.getProduct();
+			int productId = product.getProductId();
+			int quantity = orderDetail.getQuantity();
+			String productName = product.getProduct_name();
+			String information = ""; // Assuming no note field is present
+
+			htmlCode += "<tr>\n" +
+					"<td>" + productId + "</td>\n" +
+					"<td>" + quantity + "</td>\n" +
+					"<td>" + productName + "</td>\n" +
+					"<td>" + information + "</td>\n" +
+					"</tr>\n";
+		}
+
+		htmlCode += "</table>\n" +
+				"<h2>Tổng tiền: " + formattedPrice + "</h2>\n" +
+				"</body>\n" +
+				"</html>\n";
+
+		return htmlCode;
+	}
 
 
 
