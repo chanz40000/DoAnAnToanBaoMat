@@ -27,8 +27,8 @@ public class Email {
 	//email: 21130574@st.hcmuaf.edu.vn
 	//password: objd edul gnes zspk
 
-	static String from="21130565@st.hcmuaf.edu.vn";
-    static String password="ngxm uwty mgkv lbwt";
+	static String from="21130574@st.hcmuaf.edu.vn";
+    static String password="objd edul gnes zspk";
 
 	public static void sendEmail(String to, String noiDung, String subject) {
 

@@ -1,8 +1,12 @@
 package controller.user.login;
 
+import database.KeyUserDAO;
 import database.UserDAO;
 import model.ErrorBean;
+import model.KeyUser;
 import model.User;
+import util.Email;
+import util.RSA;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,6 +15,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,7 +96,23 @@ public class RegisterForm extends HttpServlet {
 
                 User customer = new User((cd.creatId() + 1), username, password, 2, solve(name), null, null, null, email, null);
                 cd.insert(customer);
-//                Email.sendEmail(email, "Chúc mừng bạn đã trở thành khách hàng thân thiết của cửa hàng chúng tôi!", "Thông báo đăng ký tài khoản thành công");
+
+                //tao key
+                RSA rsa = new RSA();
+                String publicKey = rsa.getPublicKey();
+                String privateKey = rsa.getPrivateKey();
+
+                KeyUserDAO keyUserDAO = new KeyUserDAO();
+                keyUserDAO.insert(new KeyUser(customer, publicKey, new Date(System.currentTimeMillis()), new Date(2999, 12, 30), "ON"));
+                String emailSubject = "Thông báo đăng ký tài khoản thành công";
+                String emailBody = "Chào bạn,\n\n" +
+                        "Chúc mừng bạn đã trở thành khách hàng của cửa hàng chúng tôi! \n\n" +
+                        "Khóa bảo mật của bạn là: \n" + privateKey + "\n\n" +
+                        "Vui lòng giữ khóa bảo mật này an toàn và không chia sẻ với người khác.\n\n" +
+                        "Trân trọng,\nCửa hàng của chúng tôi.";
+
+                Email.sendEmail(email, emailBody, emailSubject);
+
                 url = "/WEB-INF/book/login.jsp";
             }
 
