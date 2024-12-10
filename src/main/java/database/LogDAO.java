@@ -21,9 +21,13 @@ import java.util.ArrayList;
 public class LogDAO implements DAOInterface<Log>{
 
     public int creatId() {
-        ArrayList<Log> list=this.selectAll();
-        return list.get(list.size()-1).getId()+1;
+        ArrayList<Log> list = this.selectAll();
+        if (list.isEmpty()) {
+            return 1; // Nếu danh sách rỗng, bắt đầu từ 1
+        }
+        return list.get(list.size() - 1).getId() + 1;
     }
+
     @Override
     public int deleteAll(ArrayList<Log> list) {
         return 0;

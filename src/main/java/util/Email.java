@@ -34,7 +34,8 @@ public class Email {
 		//su dung server de gui mail
 		props.put("mail.smtp.host", "smtp.gmail.com");//SMTP HOST
 		//
-		props.put("mail.smtp.port", "smtp.gmail.com");//TLS 587 SSL 465
+//		props.put("mail.smtp.port", "smtp.gmail.com");//TLS 587 SSL 465
+		props.put("mail.smtp.port", "587");//TLS 587 SSL 465
 		//khi su dung host de gui mail thi phai dang nhap
 		props.put("mail.smtp.auth", "true");
 		//
