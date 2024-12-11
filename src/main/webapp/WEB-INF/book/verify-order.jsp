@@ -120,6 +120,48 @@
             font-size: 18px;
             padding-bottom: 10px;
         }
+        .order{
+            padding-top: 20px;
+            padding-left: 80px;
+        }
+        .custom-list {
+            list-style-type: none; /* Loại bỏ dấu chấm mặc định */
+            padding-top: 10px;
+        }
+
+        .custom-list li {
+            font-size: 20px; /* Kích thước văn bản của nội dung */
+            margin-bottom: 10px; /* Khoảng cách giữa các phần tử */
+        }
+
+        .custom-list li::before {
+            content: counter(item) ". "; /* Tự động thêm số thứ tự */
+            counter-increment: item; /* Tăng biến đếm */
+            font-size: 24px; /* Tăng kích thước của số */
+            font-weight: bold; /* Làm đậm số */
+            color: red; /* Màu đỏ cho số */
+        }
+
+        .custom-list {
+            counter-reset: item; /* Đặt lại bộ đếm */
+        }
+        .linkdown {
+            color: #a71d2a; /* Màu chữ mặc định */
+            text-decoration: none; /* Bỏ gạch chân nếu muốn */
+        }
+
+        .linkdown:hover {
+            color: #a71d2a; /* Màu chữ khi hover */
+            text-decoration: underline; /* Gạch chân khi hover nếu muốn */
+        }
+
+        .linkdown:active,
+        .linkdown:focus,
+        .linkdown:visited {
+            color: #a71d2a; /* Giữ nguyên màu chữ ở các trạng thái khác */
+            text-decoration: none; /* Bỏ gạch chân nếu có */
+        }
+
     </style>
 </head>
 
@@ -158,27 +200,43 @@
             <div class="col-lg-5 left-tab">
                 <div class="tabLef">
                     <div class="information">
-                        <h4 style="color: #a71d2a; font-weight: bold">Nhập chữ ký</h4>
+                        <h4 style="color: #a71d2a; font-weight: bold">Thông tin người nhận</h4>
                         <hr>
-                        <div class="signature">
-                            <label for="signatureInput">Chữ ký:</label>
-                            <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
-                        </div>
-
+                        <div class="name"><span>Tên:</span> ${order.nameConsignee}</div>
+                        <div><span>Địa chỉ:</span> ${order.address}</div>
+                        <div><span>Sđt:</span> ${order.phone}</div>
+                        <div><span>email:</span> ${order.user.email}</div>
+                        <div><span>Note:</span> ${order.note}</div>
+                        <div><span>Thanh toán bằng:</span> ${order.payment.paymentName}</div>
+                        <c:if test="${order.status.statusId == 1}">
+                            <div style="color: #ef8640; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 2}">
+                            <div style="color: #b98d3c; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #b98d3c" class="fa-solid fa-boxes-packing"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 3 || order.status.statusId == 7}">
+                            <div style="color: #1c67d7; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #1c67d7" class="fa-solid fa-truck-fast"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 4}">
+                            <div style="color: #38bc10; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #38bc10" class="fa-solid fa-truck-ramp-box"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 5}">
+                            <div style="color: #c31625; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #c31625" class="fa-solid fa-ban"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 6}">
+                            <div style="color: #ff0018; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName}</div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 8}">
+                            <div style="color: #c31625; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #c31625;" class="fa-solid fa-arrow-right-arrow-left"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 10}">
+                            <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #c264ff" class="fa-solid fa-box-open"></i></div>
+                        </c:if>
+                        <c:if test="${order.status.statusId == 11}">
+                            <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #f6b422" class="fa-solid fa-clock"></i></div>
+                        </c:if>
                     </div>
-                    <div class="confirmation">
-                        <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
-                            Xác nhận đơn hàng
-                        </button>
-                        <div id="verifyResult" style="margin-top: 10px; font-size: 16px; color: red;"></div>
-
-                    </div>
-                </div>
-                <br><br>
-
-            </div>
-            <div class="col-lg-7 ">
-                <div class="order">
+                    <hr>
                     <div class="content">
                         <h3>Thông tin sản phẩm của đơn hàng ${order.orderId}</h3>
                         <c:forEach var="orderDetail" items="${orderDetailList}">
@@ -215,11 +273,41 @@
                         </div>
                     </div>
                 </div>
+                <br><br>
+
+            </div>
+            <div class="col-lg-7 ">
+                <div class="order">
+                    <h4 style="color: #a71d2a; font-weight: bold">Hướng dẫn lấy chữ ký</h4>
+                    <ul class="custom-list">
+                        <li>Tải tool của chúng tôi để tạo ra chữ ký của bạn. <a class="linkdown" href="DownLoadTool">Tại đây</a></li>
+                        <li>Kiểm tra email của bạn! Lấy mã chúng tôi gửi và tiến hành ký tên</li>
+                        <li>Lấy chữ ký và nhập vào ô dưới đây (Hướng dẫn xài tool)</li>
+                    </ul>
+                    <div class="signature">
+                        <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
+                        <br>
+                        <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
+                            Xác nhận đơn hàng
+                        </button>
+                        <div id="verifyResult" style="margin-top: 10px; font-size: 16px; color: red;"></div>
+
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 </section>
+<%--                    <div class="information">--%>
+<%--                        <h4 style="color: #a71d2a; font-weight: bold">Nhập chữ ký</h4>--%>
+<%--                        <hr>--%>
 
+
+<%--                    </div>--%>
+<%--                    <div class="confirmation">--%>
+
+<%--                    </div>--%>
 
 <!-- Product Section End -->
 
