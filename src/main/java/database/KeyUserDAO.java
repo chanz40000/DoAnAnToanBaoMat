@@ -204,4 +204,9 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
 //    ON DELETE CASCADE
 //    ON UPDATE CASCADE
 //);
+
+    public static void main(String[] args) {
+        KeyUserDAO keyUserDAO = new KeyUserDAO();
+        System.out.println(keyUserDAO.selectByUser(3).get(0).getCreate_at());
+    }
 }
