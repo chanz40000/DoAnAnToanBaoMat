@@ -88,21 +88,17 @@ public class RSA {
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
-            // Tạo thông điệp thử nghiệm
-            String testMessage = "Hello RSA!";
-            Cipher cipher = Cipher.getInstance("RSA");
+            String testMessage = "Test message";
+            // Ký thông điệp bằng Private Key
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privateKey);
+            signature.update(testMessage.getBytes());
+            byte[] signedData = signature.sign();
 
-            // Mã hóa bằng publicKey
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encryptedMessage = cipher.doFinal(testMessage.getBytes());
-
-            // Giải mã bằng privateKey
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] decryptedMessage = cipher.doFinal(encryptedMessage);
-
-            // Kiểm tra thông điệp giải mã có khớp với ban đầu không
-            String decryptedText = new String(decryptedMessage);
-            return testMessage.equals(decryptedText);
+            // Xác minh chữ ký bằng Public Key
+            signature.initVerify(publicKey);
+            signature.update(testMessage.getBytes());
+            return signature.verify(signedData);
         } catch (Exception e) {
             //e.printStackTrace();
             return false;

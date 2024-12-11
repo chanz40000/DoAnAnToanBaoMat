@@ -1,5 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page isELIgnored="false" %>
+<%@ page import="util.FormatCurrency"%>
 
 <!DOCTYPE html>
 <html>
@@ -116,6 +120,7 @@
 </div>
 
 <jsp:include page="navbar.jsp"/>
+<jsp:useBean id="keyUserDAO" class="database.KeyUserDAO"/>
 <div class="full_container">
 	<div class="inner_container">
 		<div id="content">
@@ -215,25 +220,21 @@
 											</tr>
 											</thead>
 											<tbody>
+											<c:set var="id" value="${sessionScope.userC.userId}"/>
+											<c:set var="counter" value="1" scope="page" /> <!-- Khởi tạo biến đếm -->
+                                            <c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
 											<tr>
-												<td>Khóa 1</td>
-												<td>2024-12-31</td>
+												<td>Khóa ${counter}</td>
+												<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
 												<td>
-													<button class="btn btn-warning">Báo cáo</button>
+													<button class="btn btn-warning">Lộ khóa</button>
 													<button class="btn btn-danger">Xóa khóa</button>
 													<button class="btn btn-success">Sử dụng</button>
 												</td>
 											</tr>
-											<tr>
-												<td>Khóa 2</td>
-												<td>2025-01-15</td>
-												<td>
-													<button class="btn btn-warning">Báo cáo</button>
-													<button class="btn btn-danger">Xóa khóa</button>
-													<button class="btn btn-success">Sử dụng</button>
-												</td>
-											</tr>
+												<c:set var="counter" value="${counter + 1}" /> <!-- Tăng biến đếm -->
 											<!-- Thêm nhiều khóa khác -->
+											</c:forEach>
 											</tbody>
 										</table>
 									</div>
@@ -267,6 +268,7 @@
 	<script src="js/mixitup.min.js"></script>
 	<script src="js/owl.carousel.min.js"></script>
 	<script src="js/main.js"></script>
+
 
 </body>
 </html>
