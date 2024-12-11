@@ -1,4 +1,4 @@
-package controller.user.page;
+package controller.user;
 
 import database.OrderDAO;
 import database.OrderDetailDAO;
@@ -20,8 +20,6 @@ public class DownLoadTool extends HttpServlet {
 
         // Đường dẫn tuyệt đối đến file ToolBook.exe trong thư mục webapp/files
         String filePath = getServletContext().getRealPath("/file/ToolBook.exe");
-        System.out.println("Đường dẫn file tuyệt đối: " + filePath);
-
         File file = new File(filePath);
 
         if (file.exists()) {
