@@ -109,7 +109,7 @@
         }
         .totalOrder{
             color: #a71d2a;
-            font-size: 22px;
+            font-size: 25px;
             font-weight: bold;
         }
         .information span{
@@ -164,22 +164,23 @@
                             <label for="signatureInput">Chữ ký:</label>
                             <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
                         </div>
-                        <hr>
+
                     </div>
-                    <hr>
                     <div class="confirmation">
-                        <button type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
+                        <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
                             Xác nhận đơn hàng
                         </button>
+                        <div id="verifyResult" style="margin-top: 10px; font-size: 16px; color: red;"></div>
+
                     </div>
-                    <hr>
                 </div>
+                <br><br>
 
             </div>
             <div class="col-lg-7 ">
                 <div class="order">
                     <div class="content">
-                        <h3>Thông tin sản phẩm</h3>
+                        <h3>Thông tin sản phẩm của đơn hàng ${order.orderId}</h3>
                         <c:forEach var="orderDetail" items="${orderDetailList}">
                             <div class="fromOrder">
 
@@ -209,6 +210,9 @@
                                 <hr>
                             </div>
                         </c:forEach>
+                        <div class="totalOrder">
+                            Tổng tiền: ${FormatCurrency.formatCurrency(order.totalPrice)}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,6 +237,37 @@
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.80/darkreader.min.js"></script>
+<script>
+    document.getElementById("verifyButton").addEventListener("click", function () {
+        const signature = document.getElementById("signatureInput").value; // Lấy chữ ký từ ô nhập
+        const resultDiv = document.getElementById("verifyResult");
+
+        if (!signature) {
+            resultDiv.textContent = "Vui lòng nhập chữ ký!";
+            return;
+        }
+
+        // Gửi yêu cầu đến servlet VerifySignature
+        fetch("/VerifySignature?signature=" + encodeURIComponent(signature), {
+            method: "GET",
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Hiển thị kết quả
+                if (data.includes("hợp lệ")) {
+                    alert("Chữ ký hợp lệ! Đơn hàng đã được xác nhận."); // Hiển thị hộp thông báo
+                    resultDiv.style.color = "green";
+                    resultDiv.textContent = data; // Hiển thị thông báo thành công
+                } else {
+                    resultDiv.style.color = "red";
+                    resultDiv.textContent = data; // Hiển thị lỗi
+                }
+            })
+            .catch(error => {
+                resultDiv.textContent = "Đã xảy ra lỗi: " + error.message; // Hiển thị lỗi kết nối
+            });
+    });
+</script>
 
 <script>
     const toggleDarkModeButton = document.getElementById("toggle-dark-mode");
