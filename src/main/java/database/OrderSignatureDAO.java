@@ -30,7 +30,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 int orderId = rs.getInt("order_id");
                 String hash = rs.getString("hash");
                 String signature = rs.getString("signature");
-                int statusId = rs.getInt("signature_status_id");
+                int statusId = rs.getInt("status_id");
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
 
@@ -73,7 +73,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 int orderId = rs.getInt("order_id");
                 String hash = rs.getString("hash");
                 String signature = rs.getString("signature");
-                int statusId = rs.getInt("signature_status_id");
+                int statusId = rs.getInt("status_id");
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
 
@@ -92,7 +92,46 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
         return orderSignature;
     }
+    public OrderSignature selectByOrderId(int id) {
+        OrderSignature orderSignature = null;
 
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu lệnh SQL
+            String sql = "SELECT * FROM order_signatures WHERE order_id = ?";
+
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, id);
+
+            // Thực thi câu lệnh SQL
+            ResultSet rs = st.executeQuery();
+
+            // Nếu tìm thấy bản ghi, tạo đối tượng OrderSignature
+            if (rs.next()) {
+                int orderId = rs.getInt("order_id");
+                String hash = rs.getString("hash");
+                String signature = rs.getString("signature");
+                int statusId = rs.getInt("status_id");
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                Timestamp updatedAt = rs.getTimestamp("updated_at");
+
+                // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
+                Order order = new OrderDAO().selectById(id);
+                StatusOrder statusOrder = new StatusOrderDAO().selectById(statusId);
+
+                orderSignature = new OrderSignature(id, order, hash, signature, statusOrder, createdAt, updatedAt);
+            }
+            // Đóng kết nối
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return orderSignature;
+    }
     @Override
     public int insert(OrderSignature orderSignature) throws SQLException {
         int result = 0;
@@ -101,7 +140,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             Connection con = JDBCUtil.getConnection();
 
             // Tạo câu lệnh SQL
-            String sql = "INSERT INTO order_signatures (order_id, hash, signature, signature_status_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO order_signatures (order_id, hash, signature, status_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, orderSignature.getOrderId().getOrderId());
@@ -172,7 +211,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             Connection con = JDBCUtil.getConnection();
 
             // Tạo câu lệnh SQL
-            String sql = "UPDATE order_signatures SET order_id = ?, hash = ?, signature = ?, signature_status_id = ?, created_at = ?, updated_at = ? WHERE id = ?";
+            String sql = "UPDATE order_signatures SET order_id = ?, hash = ?, signature = ?, status_id = ?, created_at = ?, updated_at = ? WHERE id = ?";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, orderSignature.getOrderId().getOrderId());
@@ -193,4 +232,30 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
         }
         return result;
     }
+    public int updateSignatureAndStatusByOrderId(int orderId, String signature, StatusOrder statusId) {
+        int result = 0;
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu lệnh SQL để cập nhật signature và status
+            String sql = "UPDATE order_signatures SET signature = ?, status_id = ? WHERE order_id = ?";
+
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, signature); // Gán giá trị signature mới
+            ps.setInt(2, statusId.getStatusId());     // Gán giá trị status mới
+            ps.setInt(3, orderId);      // Gán giá trị orderId
+
+            result = ps.executeUpdate(); // Thực thi câu lệnh cập nhật
+
+            // Đóng kết nối
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // Ném ngoại lệ nếu có lỗi xảy ra
+        }
+        return result; // Trả về số dòng bị ảnh hưởng
+    }
+
+
 }

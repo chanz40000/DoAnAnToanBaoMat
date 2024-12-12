@@ -22,6 +22,12 @@ public class OrderSignature {
         this.updatedAt = updatedAt;
     }
 
+    public OrderSignature(Order orderId, String hash, StatusOrder statusId) {
+        this.orderId = orderId;
+        this.hash = hash;
+        this.statusId = statusId;
+    }
+
     // Getters and Setters
     public int getId() {
         return id;

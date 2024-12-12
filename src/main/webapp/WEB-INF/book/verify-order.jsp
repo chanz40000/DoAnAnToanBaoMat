@@ -208,6 +208,7 @@
                         <div><span>email:</span> ${order.user.email}</div>
                         <div><span>Note:</span> ${order.note}</div>
                         <div><span>Thanh toán bằng:</span> ${order.payment.paymentName}</div>
+                        <div><span>Mã đơn hàng:</span> MDH${order.orderId}</div>
                         <c:if test="${order.status.statusId == 1}">
                             <div style="color: #ef8640; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></div>
                         </c:if>
@@ -235,10 +236,13 @@
                         <c:if test="${order.status.statusId == 11}">
                             <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #f6b422" class="fa-solid fa-clock"></i></div>
                         </c:if>
+                        <c:if test="${order.status.statusId == 12}">
+                            <div style="color: #077800; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                        </c:if>
                     </div>
                     <hr>
                     <div class="content">
-                        <h3>Thông tin sản phẩm của đơn hàng ${order.orderId}</h3>
+                        <h3>Thông tin sản phẩm của đơn hàng</h3>
                         <c:forEach var="orderDetail" items="${orderDetailList}">
                             <div class="fromOrder">
 
@@ -276,7 +280,7 @@
                 <br><br>
 
             </div>
-            <div class="col-lg-7 ">
+            <div class="col-lg-7">
                 <div class="order">
                     <h4 style="color: #a71d2a; font-weight: bold">Hướng dẫn lấy chữ ký</h4>
                     <ul class="custom-list">
@@ -285,34 +289,27 @@
                         <li>Lấy chữ ký và nhập vào ô dưới đây (Hướng dẫn xài tool)</li>
                     </ul>
                     <div class="signature">
-                        <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
-                        <br>
-                        <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
-                            Xác nhận đơn hàng
-                        </button>
-                        <div id="verifyResult" style="margin-top: 10px; font-size: 16px; color: red;"></div>
-
+                        <form id="verifyForm">
+                            <div id="verifyResult" style="color: red; font-weight: bold;"></div>
+                            <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
+                            <br>
+                            <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
+                                Xác nhận đơn hàng
+                            </button>
+                        </form>
                     </div>
-
                 </div>
             </div>
+
+
         </div>
     </div>
 </section>
-<%--                    <div class="information">--%>
-<%--                        <h4 style="color: #a71d2a; font-weight: bold">Nhập chữ ký</h4>--%>
-<%--                        <hr>--%>
-
-
-<%--                    </div>--%>
-<%--                    <div class="confirmation">--%>
-
-<%--                    </div>--%>
-
-<!-- Product Section End -->
 
 <!-- Footer Section Begin -->
-<jsp:include page="footer.jsp"/>
+<footer class="footer spad">
+    <jsp:include page="footer.jsp"/>
+</footer>
 <!-- Footer Section End -->
 
 <!-- Js Plugins -->
@@ -325,37 +322,7 @@
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.80/darkreader.min.js"></script>
-<script>
-    document.getElementById("verifyButton").addEventListener("click", function () {
-        const signature = document.getElementById("signatureInput").value; // Lấy chữ ký từ ô nhập
-        const resultDiv = document.getElementById("verifyResult");
 
-        if (!signature) {
-            resultDiv.textContent = "Vui lòng nhập chữ ký!";
-            return;
-        }
-
-        // Gửi yêu cầu đến servlet VerifySignature
-        fetch("/VerifySignature?signature=" + encodeURIComponent(signature), {
-            method: "GET",
-        })
-            .then(response => response.text())
-            .then(data => {
-                // Hiển thị kết quả
-                if (data.includes("hợp lệ")) {
-                    alert("Chữ ký hợp lệ! Đơn hàng đã được xác nhận."); // Hiển thị hộp thông báo
-                    resultDiv.style.color = "green";
-                    resultDiv.textContent = data; // Hiển thị thông báo thành công
-                } else {
-                    resultDiv.style.color = "red";
-                    resultDiv.textContent = data; // Hiển thị lỗi
-                }
-            })
-            .catch(error => {
-                resultDiv.textContent = "Đã xảy ra lỗi: " + error.message; // Hiển thị lỗi kết nối
-            });
-    });
-</script>
 
 <script>
     const toggleDarkModeButton = document.getElementById("toggle-dark-mode");
@@ -384,7 +351,34 @@
     // Enable Dark Reader when the page loads
 
 </script>
+<script>
+    document.getElementById("verifyButton").addEventListener("click", function () {
+        const signature = document.getElementById("signatureInput").value;
 
+        if (!signature.trim()) {
+            document.getElementById("verifyResult").textContent = "Vui lòng nhập chữ ký!";
+            return;
+        }
+
+        fetch("VerifySignature?signature=" + encodeURIComponent(signature))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Chuyển hướng trang nếu xác thực thành công
+                    window.location.href = data.redirectUrl;
+                } else {
+                    // Hiển thị thông báo lỗi
+                    document.getElementById("verifyResult").style.color = "red";
+                    document.getElementById("verifyResult").textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("verifyResult").textContent = "Đã xảy ra lỗi khi gửi yêu cầu.";
+            });
+    });
+
+</script>
 
 </body>
 

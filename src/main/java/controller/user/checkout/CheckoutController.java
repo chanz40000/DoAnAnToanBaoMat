@@ -6,6 +6,8 @@ import model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.ConfigUtil;
+import util.Email;
+import util.Hash;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -20,10 +22,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @WebServlet(name = "CheckoutController", value = "/CheckoutController")
 public class CheckoutController extends HttpServlet {
@@ -153,7 +159,59 @@ public class CheckoutController extends HttpServlet {
             }
             if (overallResult > 0) {
 
-//                String ghnResponse = sendOrderToGHN(order, cart);
+                CompletableFuture.runAsync(() -> {
+                try {
+                // Serialize dữ liệu để tạo chuỗi hash
+                StringBuilder serializedData = new StringBuilder();
+                serializedData.append("user_id:").append(user.getUserId()).append(",");
+                serializedData.append("email:").append(user.getEmail()).append(",");
+                serializedData.append("order_id:").append(order.getOrderId()).append(",");
+                serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
+                serializedData.append("booking_date:").append(order.getBookingDate()).append(",");
+                serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
+
+                for (CartItem cartItem : cart.getCart_items()) {
+                    serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
+                    serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
+                    serializedData.append("price:").append(cartItem.getPrice()).append(",");
+                    serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+                }
+
+                // Tính hash từ dữ liệu serialize
+
+                    String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
+                    OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+                    StatusOrder statusOrder1 = new StatusOrder(11);
+                    OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
+                    int addHash = orderSignatureDAO.insert(orderSignature);
+                    if (addHash > 0) {
+                        String emailSubject = "Mã xác thực bạn cần ký tên";
+                        String emailBody = "<!DOCTYPE html>" +
+                                "<html>" +
+                                "<head>" +
+                                "<meta charset='UTF-8'>" +
+                                "<title>Xác thực chữ ký</title>" +
+                                "</head>" +
+                                "<body>" +
+                                "<h1>Xin chào " + user.getName() + "</h1>" +
+                                "<h1>Mã đơn hàng của bạn là: " + "MDH"+order.getOrderId() + "</h1>" +
+                                "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
+                                "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
+                                "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
+                                "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
+                                "<p>Trân trọng,</p>" +
+                                "<p>Cửa hàng của chúng tôi</p>" +
+                                "</body>" +
+                                "</html>";
+
+                        Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+                    }
+
+
+                } catch (NoSuchAlgorithmException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                });
 
                 // Xóa giỏ hàng sau khi đặt hàng thành công
                 cart.clearCart();
