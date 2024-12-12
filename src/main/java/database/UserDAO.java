@@ -1,5 +1,6 @@
 package database;
 
+import model.Log;
 import model.User;
 import util.PasswordEncryption;
 
@@ -8,6 +9,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -567,7 +569,10 @@ public class UserDAO extends AbsDAO<User> {
             rs.setString(10, user.getAvatar());
 
             result = rs.executeUpdate();
-            int x=super.insert(user);
+//            int x=super.insert(user);
+            LogDAO logDAO = new LogDAO();
+            Log log = new Log(logDAO.creatId(), "INFO", LocalDateTime.now(), this.getIpAddress(), null, "them nguoi dung: "+ user.getName()+", email: "+ user.getEmail(), null);
+            new LogDAO().update(log);
             JDBCUtil.closeConnection(con);
 
         } catch (Exception e) {
