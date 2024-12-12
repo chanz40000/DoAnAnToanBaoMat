@@ -111,6 +111,7 @@ public class RegisterForm extends HttpServlet {
                         "Vui long gi khoa va khong chia se voi nguoi khac.\n\n" +
                         "Tran trong,\nCua hang sach cutee.";
 
+                System.out.println(privateKey);
                 Email.sendEmail(email, emailBody, emailSubject);
 
                 url = "/WEB-INF/book/login.jsp";
