@@ -204,6 +204,20 @@
                                                 class="nav-link active"
                                                 role="tab"
                                                 data-bs-toggle="tab"
+                                                data-bs-target="#navs-XacThucChuKy"
+                                                aria-controls="navs-XacThucChuKy"
+                                                aria-selected="true"
+                                        >
+                                            <i class="tf-icons bx bx-home"></i> Cần xác thực chữ ký
+                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-danger">3</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button
+                                                type="button"
+                                                class="nav-link"
+                                                role="tab"
+                                                data-bs-toggle="tab"
                                                 data-bs-target="#navs-justified-home"
                                                 aria-controls="navs-justified-home"
                                                 aria-selected="true"
@@ -328,8 +342,37 @@
 
                                 <!-- Tab content -->
                                 <div class="tab-content">
-                                    <div class="tab-pane fade show active" id="navs-justified-home" role="tabpanel" aria-labelledby="navs-justified-home-tab">
-                                        <h5 class="card-header">Danh sách đơn hàng giao thành công  </h5>
+                                    <div class="tab-pane fade show active" id="navs-XacThucChuKy" role="tabpanel" aria-labelledby="navs-XacThucChuKy-tab">
+                                        <h5 class="card-header">Danh sách đơn hàng chờ xác thực chữ ký  </h5>
+                                        <div class="table-responsive text-nowrap">
+                                            <table id="example10" class="table table-striped" style="width:100%">
+                                                <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Mã User</th>
+                                                    <th>Ngày đặt</th>
+                                                    <th>Trạng thái</th>
+
+                                                    <th></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Mã User</th>
+                                                    <th>Ngày đặt</th>
+                                                    <th>Trạng thái</th>
+
+                                                    <th></th>
+                                                </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="navs-justified-home" role="tabpanel" aria-labelledby="navs-justified-home-tab">
+                                        <h5 class="card-header">Danh sách đơn hàng chờ xác nhận  </h5>
                                         <div class="table-responsive text-nowrap">
                                             <table id="example1" class="table table-striped" style="width:100%">
                                                 <thead>
@@ -647,7 +690,8 @@
 <script>
     $(document).ready(function() {
         const tables = [
-            { id: '#example1', status: 1 },
+            { id: '#example10', status: 11 },
+            { id: '#example1', status: 12 },
             { id: '#example2', status: 2 },
             { id: '#example3', status: 3 },
             { id: '#example4', status: 4 },
@@ -687,7 +731,7 @@
                         "data": "orderId",
                         "render": function(data, type, row) {
                             let buttons = '';
-                            if ([1, 5, 7].includes(table.status)) {
+                            if ([12, 5, 7].includes(table.status)) {
                                 buttons = '<button type="button" class="btn btn-primary" onclick="confirmOrder(' + data + ', ' + row.status.statusId + ')">Chấp nhận</button>' +
                                     '<button type="button" class="btn btn-danger" onclick="rejectOrder(' + data + ', ' + row.status.statusId + ')">Từ chối</button>';
                             } else if (table.status === 2) {
@@ -713,7 +757,7 @@
 
         // Update the switch statement to handle all possible cases
         switch (currentStatus) {
-            case 1: newStatus = 2; break;
+            case 12: newStatus = 2; break;
             case 2: newStatus = 3; break;
             case 5: newStatus = 6; break;
             case 7: newStatus = 8; break;
@@ -756,6 +800,7 @@
         });
     }
     function reloadAllTables() {
+        $('#example10').DataTable().ajax.reload();
         $('#example1').DataTable().ajax.reload();
         $('#example2').DataTable().ajax.reload();
         $('#example3').DataTable().ajax.reload();
