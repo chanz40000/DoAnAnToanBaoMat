@@ -362,13 +362,14 @@
                             </div>
                             <div id="statusXacNhan" class="container tab-pane">
                                 <c:set var="statusXacNhan" value="1"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusId(id, statusXacNhan)}">
+                                <c:set var="statusXacNhanChuKy" value="12"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusXacNhan)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
