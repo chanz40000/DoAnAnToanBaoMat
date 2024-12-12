@@ -101,6 +101,28 @@ public class OrderDAO extends AbsDAO<Order>{
         }
         return orders;
     }
+
+    /**
+     * Cập nhật trạng thái các đơn hàng đã quá 24 giờ và chưa xác nhận chữ ký (status_id = 11) thành "hủy đơn" (status_id = 6)
+     */
+    public int cancelExpiredOrders() {
+        int rowsUpdated = 0;
+        try {
+            Connection con = JDBCUtil.getConnection();
+            String sql = "UPDATE orders " +
+                    "SET status_id = 6 " +
+                    "WHERE status_id = 11 " +
+                    "AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24";
+            PreparedStatement st = con.prepareStatement(sql);
+            rowsUpdated = st.executeUpdate();
+            JDBCUtil.closeConnection(con);
+            System.out.println("Da cap nhat " + rowsUpdated + " dơn hang sang trang thai 'huy don'.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowsUpdated;
+    }
+
     public void updateStatusOrder(int orderId, StatusOrder status){
         int result = 0;
         try (Connection con = JDBCUtil.getConnection();
