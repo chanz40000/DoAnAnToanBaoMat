@@ -141,4 +141,29 @@ public class RSA {
         return new String(out, StandardCharsets.UTF_8);
     }
 
+    public boolean verifySignature(String data, String signatureBase64, String publicKeyBase64) {
+        try {
+            byte[] datas = data.getBytes();
+            // Chuyển chuỗi khóa công khai Base64 thành PublicKey
+            PublicKey publicKey = getPublicKeyFromString(publicKeyBase64);
+
+            // Giải mã chữ ký từ Base64 thành mảng byte
+            byte[] signatureBytes = Base64.getDecoder().decode(signatureBase64);
+
+            // Tạo đối tượng Signature với thuật toán SHA256withRSA
+            Signature signature = Signature.getInstance("SHA256withRSA");
+
+            // Khởi tạo đối tượng Signature với khóa công khai
+            signature.initVerify(publicKey);
+
+            // Cập nhật dữ liệu cần xác minh (phải trùng khớp với dữ liệu đã ký ban đầu)
+            signature.update(data.getBytes(StandardCharsets.UTF_8));
+
+            // Xác thực chữ ký và trả về kết quả
+            return signature.verify(signatureBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

@@ -3,6 +3,7 @@ package model;
 
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order{
@@ -17,7 +18,7 @@ public class Order{
     private String note;
     private double shippingFee;
     private StatusOrder status;
-    private List<OrderDetail> orderDetailList;
+    private List<OrderDetail> orderDetailList = new ArrayList<OrderDetail>();
 
     public Order(int orderId, User user, double totalPrice, String nameConsignee, String phone, String address, Payment payment, Timestamp bookingDate, String note, double shippingFee, StatusOrder status) {
         this.orderId = orderId;
