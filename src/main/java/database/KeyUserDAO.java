@@ -4,6 +4,8 @@ import model.ChangePrice;
 import model.KeyUser;
 import model.Product;
 import model.User;
+import util.Email;
+import util.RSA;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -84,6 +86,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
         return keyUserArrayList;
     }
 
+
+
     @Override
     public KeyUser selectById(int id) {
         KeyUser keyUser = null;
@@ -109,6 +113,41 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
                 User user = userDAO.selectById(user_id);
 
                  keyUser = new KeyUser(user, key, create_at, expired_at, status);
+            }
+            JDBCUtil.closeConnection(con);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return keyUser;
+    }
+
+
+    public KeyUser selectByUserIdStatus(int id, String status) {
+        KeyUser keyUser = null;
+
+        try {
+            Connection con = JDBCUtil.getConnection();
+
+            String sql = "SELECT * FROM key_user WHERE user_id = ? AND status = ?";
+
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, id);
+            st.setString(2, status);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                int user_id = rs.getInt("user_id");
+                String key = rs.getString("public_key");
+                Date create_at = rs.getDate("create_at");
+                Date expired_at = rs.getDate("expired_at");
+                 status = rs.getString("status");
+
+
+                UserDAO userDAO = new UserDAO();
+                User user = userDAO.selectById(user_id);
+
+                keyUser = new KeyUser(user, key, create_at, expired_at, status);
             }
             JDBCUtil.closeConnection(con);
         } catch (SQLException e) {
@@ -177,7 +216,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
         int result = 0;
         try {
             Connection con = JDBCUtil.getConnection();
-            String sql = "UPDATE key_user SET public_key=?, create_at=?, expired_at=?, date_update=? WHERE user_id=?";
+            String sql = "UPDATE key_user SET public_key=?, create_at=?, expired_at=?, status=? WHERE user_id=? AND status='ON'";
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, keyUser.getKey());
             ps.setDate(2, keyUser.getCreate_at());
@@ -191,6 +230,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
         }
         return result;
     }
+    
 //    use book;
 //    CREATE TABLE key_user (
 //            id INT AUTO_INCREMENT PRIMARY KEY,
@@ -204,6 +244,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
 //    ON DELETE CASCADE
 //    ON UPDATE CASCADE
 //);
+    //phuong thuc cho nguoi dung bao loi key, cap nhat key moi
+
 
     public static void main(String[] args) {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
