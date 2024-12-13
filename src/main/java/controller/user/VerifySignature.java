@@ -39,7 +39,7 @@ public class VerifySignature extends HttpServlet {
 
         try {
             KeyUserDAO keyUserDAO = new KeyUserDAO();
-            KeyUser userKey = keyUserDAO.selectById(user.getUserId());
+            KeyUser userKey = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
             String publicKey = userKey.getKey();
 
             OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
