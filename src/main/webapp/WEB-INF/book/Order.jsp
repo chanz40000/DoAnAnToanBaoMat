@@ -348,8 +348,8 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
-                                                <button class="badge bg-danger me-1 CancelOrderBt"
-                                                        style="font-size: 22px; border: none; width: auto"
+                                                <button class="badge bg-success me-1 CancelOrderBt"
+                                                        style="font-size: 22px; border: none; width: auto; color: white"
                                                         onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
                                                     Xác nhận
                                                 </button>
