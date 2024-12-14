@@ -107,12 +107,12 @@ public class RegisterForm extends HttpServlet {
                 String emailSubject = "Thong bao dang ky tai khoan thanh cong!";
                 String emailBody = "Hellooo,\n\n" +
                         "Chuc mung ban da tro thanh khach hang than thiet cua chung toi! \n\n" +
-                        "Khoa bao mat cua ban la: \n" + privateKey + "\n\n" +
+                        "Khoa bao mat cua ban duoc dinh kem o duoi.\n" + "\n\n" +
                         "Vui long gi khoa va khong chia se voi nguoi khac.\n\n" +
                         "Tran trong,\nCua hang sach cutee.";
 
                 System.out.println(privateKey);
-                Email.sendEmail(email, emailBody, emailSubject);
+                Email.sendEmailWithAttachment(email, emailSubject, emailBody, "private_key.txt", privateKey);
 
                 url = "/WEB-INF/book/login.jsp";
             }

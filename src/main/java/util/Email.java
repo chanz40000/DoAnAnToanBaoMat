@@ -10,6 +10,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -210,7 +212,7 @@ public class Email {
 	}
 
 
-	public static void sendEmailWithAttachment(String to, String subject, String body, File attachment) {
+	public static void sendEmailWithAttachment(String to, String subject, String body, String nameFile, String contentFile) {
 		// Configure mail server properties
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "smtp.gmail.com");
@@ -247,6 +249,13 @@ public class Email {
 			textPart.setContent(body, "text/html; charset=UTF-8");
 			multipart.addBodyPart(textPart);
 
+			File attachment = new File(nameFile);
+
+			FileWriter writer = new FileWriter(attachment);
+				// Write content to file
+				writer.write(contentFile);
+				writer.flush();
+
 			// Add attachment part
 			if (attachment != null && attachment.exists()) {
 				MimeBodyPart attachmentPart = new MimeBodyPart();
@@ -256,7 +265,6 @@ public class Email {
 
 			// Set the complete message parts
 			message.setContent(multipart);
-
 			// Send the message
 			Transport.send(message);
 			System.out.println("Email sent successfully with attachment.");
@@ -275,7 +283,7 @@ public class Email {
 		String body = "<h1>This is a test email</h1><p>Please find the attached file below.</p>";
 		File attachment = new File("C:\\Users\\ADMIN\\Downloads\\CreateKeyServlet.java"); // Replace with the actual file path
 
-		sendEmailWithAttachment(recipient, subject, body, attachment);
+		//sendEmailWithAttachment(recipient, subject, body, attachment);
 
 	}
 

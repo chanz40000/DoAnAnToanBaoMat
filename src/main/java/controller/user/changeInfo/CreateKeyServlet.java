@@ -9,9 +9,13 @@ import util.RSA;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+
+import static util.Email.sendEmailWithAttachment;
 
 @WebServlet(name = "CreateKeyServlet", value = "/CreateKeyServlet")
 public class CreateKeyServlet extends HttpServlet {
@@ -53,7 +57,7 @@ public class CreateKeyServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/book/profile.jsp").forward(request, response);
     }
 
-    public boolean updatekeyy(KeyUser keyUser){
+    public boolean updatekeyy(KeyUser keyUser) {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
         Date date = new Date(System.currentTimeMillis());
         //DOI NGAY het han
@@ -70,14 +74,16 @@ public class CreateKeyServlet extends HttpServlet {
             //gui mail
             String emailSubject = "Thong bao cap nhat khoa bao mat!";
             String emailBody = "Hellooo,\n\n" +
-                    "Khoa bao mat moi cua ban la: \n" + rsa.getPrivateKey() + "\n\n" +
+                    "Chung toi da gui khoa bao mat duoc luu trong file private_key.txt dinh kem o duoi cho ban. \n" +  "\n\n" +
                     "Vui long gi khoa va khong chia se voi nguoi khac.\n\n" +
                     "Tran trong,\nCua hang sach cutee.";
 
-            Email.sendEmail(keyUser.getUser_id().getEmail(), emailBody, emailSubject);
-            return true;
+            // Send email with the created file as an attachment
+            Email.sendEmailWithAttachment(keyUser.getUser_id().getEmail(), emailSubject, emailBody, "private_key.txt", rsa.getPrivateKey());
+          return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
     }
 }
