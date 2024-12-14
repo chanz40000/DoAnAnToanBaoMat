@@ -113,14 +113,39 @@ public class OrderDAO extends AbsDAO<Order>{
                     "SET status_id = 6 " +
                     "WHERE status_id = 11 " +
                     "AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24";
+//                    "AND TIMESTAMPDIFF(MINUTE, booking_date, NOW()) >= 1";
             PreparedStatement st = con.prepareStatement(sql);
             rowsUpdated = st.executeUpdate();
             JDBCUtil.closeConnection(con);
-            System.out.println("Da cap nhat " + rowsUpdated + " dơn hang sang trang thai 'huy don'.");
+
+
+            System.out.println("Da cap nhat " + rowsUpdated + " don hang sang trang thai 'huy don'.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return rowsUpdated;
+    }
+    public List<Order> getExpiredOrders() {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = JDBCUtil.getConnection();
+             PreparedStatement st = con.prepareStatement(
+                     "SELECT * FROM orders WHERE status_id = 6 AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24"
+             );
+             ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setOrderId(rs.getInt("order_id"));
+                order.getUser().setUserId(rs.getInt("user_id"));
+                order.setTotalPrice(rs.getDouble("total_price"));
+                order.setBookingDate(rs.getTimestamp("booking_date"));
+                order.setStatus(new StatusOrder(6, "Hủy đơn"));
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
     }
 
     public void updateStatusOrder(int orderId, StatusOrder status){
@@ -136,7 +161,7 @@ public class OrderDAO extends AbsDAO<Order>{
             Order order = orderDAO.selectById(orderId);
             this.setPreValue(this.gson.toJson(order));
             order.setStatus(status);
-            this.setValue("change status: " + status);
+            this.setValue("Don hang co ma: "+order.getOrderId()+" da duoc thay doi trang thanh: " + order.getStatus().getStatusName());
             int x = super.update(order);
         } catch (Exception e) {
             e.printStackTrace();

@@ -172,58 +172,58 @@ public class CheckoutController extends HttpServlet {
             if (overallResult > 0) {
                 // Generate the hash after all order and order details are saved
                 CompletableFuture.runAsync(() -> {
-                    try {
-                        // Serialize the order details after everything is saved
-                        StringBuilder serializedData = new StringBuilder();
-                        serializedData.append("user_id:").append(user.getUserId()).append(",");
-                        serializedData.append("email:").append(user.getEmail()).append(",");
-                        serializedData.append("order_id:").append(order.getOrderId()).append(",");
-                        serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
-                        serializedData.append("booking_date:").append(order.getBookingDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",");
-                        serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
+                try {
+                // Serialize dữ liệu để tạo chuỗi hash
+                StringBuilder serializedData = new StringBuilder();
+                Order orderInDatabase = orderDAO.selectById(order.getOrderId());
+                serializedData.append("user_id:").append(user.getUserId()).append(",");
+                serializedData.append("email:").append(user.getEmail()).append(",");
+                serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
+                serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
+                serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
+                serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
 
-                        // Add cart items details
-                        for (CartItem cartItem : cart.getCart_items()) {
-                            serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
-                            serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
-                            serializedData.append("price:").append(cartItem.getPrice()).append(",");
-                            serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
-                        }
+                for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
+                    serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
+                    serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
+                    serializedData.append("price:").append(cartItem.getPrice()).append(",");
+                    serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+                }
+                    String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
 
-                        System.out.println("Serialized data before hashing: ");
-                        System.out.println(serializedData.toString());
+                    System.out.println("Serialized Data (Checkout): " + serializedData.toString());
+                    System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
 
-                        // Calculate hash from serialized data
-                        String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
-                        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-                        StatusOrder statusOrder1 = new StatusOrder(11);
-                        OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
-                        int addHash = orderSignatureDAO.insert(orderSignature);
+                    OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+                    StatusOrder statusOrder1 = new StatusOrder(11);
+                    OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
+                    int addHash = orderSignatureDAO.insert(orderSignature);
 
-                        if (addHash > 0) {
-                            String emailSubject = "Mã xác thực bạn cần ký tên";
-                            String emailBody = "<!DOCTYPE html>" +
-                                    "<html>" +
-                                    "<head>" +
-                                    "<meta charset='UTF-8'>" +
-                                    "<title>Xác thực chữ ký</title>" +
-                                    "</head>" +
-                                    "<body>" +
-                                    "<h1>Xin chào " + user.getName() + "</h1>" +
-                                    "<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
-                                    "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
-                                    "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
-                                    "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
-                                    "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
-                                    "<p>Trân trọng,</p>" +
-                                    "<p>Cửa hàng của chúng tôi</p>" +
-                                    "</body>" +
-                                    "</html>";
+                    if (addHash > 0) {
+                        String emailSubject = "Mã xác thực của đơn hàng MDH" +orderInDatabase.getOrderId()+ " bạn cần ký tên";
+                        String emailBody = "<!DOCTYPE html>" +
+                                "<html>" +
+                                "<head>" +
+                                "<meta charset='UTF-8'>" +
+                                "<title>Xác thực chữ ký</title>" +
+                                "</head>" +
+                                "<body>" +
+                                "<h1>Xin chào " + user.getName() + "</h1>" +
+                                "<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
+                                "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
+                                "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
+                                "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
+                                "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
+                                "<p>Trân trọng,</p>" +
+                                "<p>Cửa hàng của chúng tôi</p>" +
+                                "</body>" +
+                                "</html>";
 
-                            Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
-                        }
+                        Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+                    }
 
-                    } catch (NoSuchAlgorithmException | SQLException e) {
+
+                } catch (NoSuchAlgorithmException | SQLException e) {
                         throw new RuntimeException(e);
                     }
                 });
