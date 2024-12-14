@@ -6,7 +6,10 @@ package util;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -207,11 +210,72 @@ public class Email {
 	}
 
 
+	public static void sendEmailWithAttachment(String to, String subject, String body, File attachment) {
+		// Configure mail server properties
+		Properties props = new Properties();
+		props.put("mail.smtp.host", "smtp.gmail.com");
+		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+
+		// Create authenticator
+		Authenticator auth = new Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(from, password);
+			}
+		};
+
+		// Create a new email session
+		Session session = Session.getInstance(props, auth);
+
+		try {
+			// Create a new email message
+			MimeMessage message = new MimeMessage(session);
+
+			// Set email attributes
+			message.setFrom(new InternetAddress(from));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
+			message.setSubject(subject, "UTF-8");
+			message.setSentDate(new Date());
+
+			// Create a multipart message for attachment
+			Multipart multipart = new MimeMultipart();
+
+			// Add text part
+			MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setContent(body, "text/html; charset=UTF-8");
+			multipart.addBodyPart(textPart);
+
+			// Add attachment part
+			if (attachment != null && attachment.exists()) {
+				MimeBodyPart attachmentPart = new MimeBodyPart();
+				attachmentPart.attachFile(attachment);
+				multipart.addBodyPart(attachmentPart);
+			}
+
+			// Set the complete message parts
+			message.setContent(multipart);
+
+			// Send the message
+			Transport.send(message);
+			System.out.println("Email sent successfully with attachment.");
+		} catch (Exception e) {
+			System.out.println("Error while sending email with attachment.");
+			e.printStackTrace();
+		}
+	}
 
 
 
 	public static void main(String[] args) {
+// Example usage
+		String recipient = "trangthuyjungkook@gmail.com";
+		String subject = "Test Email with Attachment";
+		String body = "<h1>This is a test email</h1><p>Please find the attached file below.</p>";
+		File attachment = new File("C:\\Users\\ADMIN\\Downloads\\CreateKeyServlet.java"); // Replace with the actual file path
 
+		sendEmailWithAttachment(recipient, subject, body, attachment);
 
 	}
 
