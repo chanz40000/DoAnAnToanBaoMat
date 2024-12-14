@@ -3,12 +3,13 @@ package controller.user.checkout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import database.*;
 import model.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import util.ConfigUtil;
 import util.Email;
 import util.Hash;
 
+import org.json.JSONArray;
+
+import org.json.JSONObject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,28 +28,31 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @WebServlet(name = "CheckoutController", value = "/CheckoutController")
 public class CheckoutController extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        // Do nothing for GET requests
     }
 
     @Override
+
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
 
+        // Nhận thông tin từ client
         String fullNameTinh = request.getParameter("tinh");
         String fullNameQuan = request.getParameter("quan");
         String fullNamePhuong = request.getParameter("phuong");
-        OrderDAO orderdao = new OrderDAO();
-
         String address = request.getParameter("address");
         String fullAddress = fullNameTinh + ", " + fullNameQuan + ", " + fullNamePhuong + ", " + address;
         String note = request.getParameter("note");
@@ -69,45 +73,51 @@ public class CheckoutController extends HttpServlet {
 
         Cart cart = (Cart) session.getAttribute("cart");
         int totalQuantity = cart.getCart_items().stream().mapToInt(CartItem::getQuantity).sum();
-
         int shippingCost = "Hồ Chí Minh".equals(fullNameTinh) ? 20000 * totalQuantity : 40000 * totalQuantity;
 
         double cartTotal = cart.calculateTotal();
-
         Double discountValue = (Double) session.getAttribute("discountValue");
-        Integer discountType = (Integer) session.getAttribute("discountType"); // Assuming discountType is saved in session
+        Integer discountType = (Integer) session.getAttribute("discountType");
+
         double discount = (discountValue != null) ? discountValue : 0.0;
 
-// Calculate the new total based on discount type
+        // Tính toán tổng số tiền sau khi áp dụng giảm giá
         double newTotal;
         if (discountType != null && discountType == 1) {
-            // Percentage discount
+            // Giảm giá theo tỷ lệ phần trăm
             newTotal = cartTotal - (cartTotal * discount / 100);
         } else if (discountType != null && discountType == 2) {
-            // Fixed amount discount
+            // Giảm giá theo giá trị cố định
             newTotal = cartTotal - discount;
         } else {
-            // No discount
+            // Không có giảm giá
             newTotal = cartTotal;
         }
 
         double allTotal = newTotal + shippingCost;
 
-
+        // Tạo đối tượng Order
         OrderDAO orderDAO = new OrderDAO();
         PaymentDAO paymentDAO = new PaymentDAO();
         Payment payment = paymentDAO.selectById(paymentId);
         StatusOrder statusOrder = new StatusOrder(11);
 
-        Order order = new Order(orderDAO.creatId() + 1, user, allTotal, name, phone, fullAddress, payment, new Timestamp(System.currentTimeMillis()), note, shippingCost, statusOrder);
+        // Sử dụng LocalDateTime và DateTimeFormatter để có timestamp với giây
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = now.format(formatter);
+        Timestamp bookingTimestamp = Timestamp.valueOf(formattedDate);
+
+        Order order = new Order(orderDAO.creatId() + 1, user, allTotal, name, phone, fullAddress, payment, bookingTimestamp, note, shippingCost, statusOrder);
         order.setNameConsignee(name);
         order.setUser(user);
         order.setPhone(phone);
         order.setAddress(fullAddress);
         order.setNote(note);
-        order.setTotalPrice(allTotal); // Ensure the total price includes the final amount
+        order.setTotalPrice(allTotal);
         order.setStatus(statusOrder);
 
+        // Lưu đơn hàng vào cơ sở dữ liệu
         session.setAttribute("orderBooking", order);
         int resultOrder = orderDAO.insert(order);
 
@@ -115,6 +125,7 @@ public class CheckoutController extends HttpServlet {
             OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
             ProductDAO productDAO = new ProductDAO();
             int overallResult = 1;
+
             for (CartItem cartItem : cart.getCart_items()) {
                 Product product = cartItem.getProduct();
                 Integer selectedCouponId = (Integer) session.getAttribute("selectedCouponId");
@@ -157,60 +168,64 @@ public class CheckoutController extends HttpServlet {
                     break;
                 }
             }
+
             if (overallResult > 0) {
-
+                // Generate the hash after all order and order details are saved
                 CompletableFuture.runAsync(() -> {
-                try {
-                // Serialize dữ liệu để tạo chuỗi hash
-                StringBuilder serializedData = new StringBuilder();
-                serializedData.append("user_id:").append(user.getUserId()).append(",");
-                serializedData.append("email:").append(user.getEmail()).append(",");
-                serializedData.append("order_id:").append(order.getOrderId()).append(",");
-                serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
-                serializedData.append("booking_date:").append(order.getBookingDate()).append(",");
-                serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
+                    try {
+                        // Serialize the order details after everything is saved
+                        StringBuilder serializedData = new StringBuilder();
+                        serializedData.append("user_id:").append(user.getUserId()).append(",");
+                        serializedData.append("email:").append(user.getEmail()).append(",");
+                        serializedData.append("order_id:").append(order.getOrderId()).append(",");
+                        serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
+                        serializedData.append("booking_date:").append(order.getBookingDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",");
+                        serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
 
-                for (CartItem cartItem : cart.getCart_items()) {
-                    serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
-                    serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
-                    serializedData.append("price:").append(cartItem.getPrice()).append(",");
-                    serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
-                }
+                        // Add cart items details
+                        for (CartItem cartItem : cart.getCart_items()) {
+                            serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
+                            serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
+                            serializedData.append("price:").append(cartItem.getPrice()).append(",");
+                            serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+                        }
 
-                // Tính hash từ dữ liệu serialize
+                        System.out.println("Serialized data before hashing: ");
+                        System.out.println(serializedData.toString());
 
-                    String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
-                    OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-                    StatusOrder statusOrder1 = new StatusOrder(11);
-                    OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
-                    int addHash = orderSignatureDAO.insert(orderSignature);
-                    if (addHash > 0) {
-                        String emailSubject = "Mã xác thực bạn cần ký tên";
-                        String emailBody = "<!DOCTYPE html>" +
-                                "<html>" +
-                                "<head>" +
-                                "<meta charset='UTF-8'>" +
-                                "<title>Xác thực chữ ký</title>" +
-                                "</head>" +
-                                "<body>" +
-                                "<h1>Xin chào " + user.getName() + "</h1>" +
-                                "<h1>Mã đơn hàng của bạn là: " + "MDH"+order.getOrderId() + "</h1>" +
-                                "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
-                                "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
-                                "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
-                                "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
-                                "<p>Trân trọng,</p>" +
-                                "<p>Cửa hàng của chúng tôi</p>" +
-                                "</body>" +
-                                "</html>";
+                        // Calculate hash from serialized data
+                        String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
+                        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+                        StatusOrder statusOrder1 = new StatusOrder(11);
+                        OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
+                        int addHash = orderSignatureDAO.insert(orderSignature);
 
-                        Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+                        if (addHash > 0) {
+                            String emailSubject = "Mã xác thực bạn cần ký tên";
+                            String emailBody = "<!DOCTYPE html>" +
+                                    "<html>" +
+                                    "<head>" +
+                                    "<meta charset='UTF-8'>" +
+                                    "<title>Xác thực chữ ký</title>" +
+                                    "</head>" +
+                                    "<body>" +
+                                    "<h1>Xin chào " + user.getName() + "</h1>" +
+                                    "<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
+                                    "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
+                                    "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
+                                    "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
+                                    "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
+                                    "<p>Trân trọng,</p>" +
+                                    "<p>Cửa hàng của chúng tôi</p>" +
+                                    "</body>" +
+                                    "</html>";
+
+                            Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+                        }
+
+                    } catch (NoSuchAlgorithmException | SQLException e) {
+                        throw new RuntimeException(e);
                     }
-
-
-                } catch (NoSuchAlgorithmException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
                 });
 
                 // Xóa giỏ hàng sau khi đặt hàng thành công
@@ -224,23 +239,25 @@ public class CheckoutController extends HttpServlet {
                     session.removeAttribute("discount");
                     session.removeAttribute("newTotal");
                     response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
-
                     return;
                 }
             }
         }
         // Trả về kết quả
+
 //        JsonObject jsonResponse = new JsonObject();
+
 //        jsonResponse.addProperty("success", true);
+
 //        jsonResponse.addProperty("newTotal", newTotal);
+
 //        jsonResponse.addProperty("discount", discount);
-        // Tạo ObjectMapper
+
+        // Tạo ObjectMapper để chuyển đối tượng Order thành JSON
         ObjectMapper objectMapper = new ObjectMapper();
-
-        // Chuyển đối tượng Order thành chuỗi JSON
         String orderJson = objectMapper.writeValueAsString(order);
-
-        // Lưu chuỗi JSON vào thuộc tính của request để sử dụng trong JSP hoặc gửi lại cho client
         request.setAttribute("orderJson", orderJson);
     }
 }
+
+

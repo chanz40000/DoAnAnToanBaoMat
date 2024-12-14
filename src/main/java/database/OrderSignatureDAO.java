@@ -4,8 +4,13 @@ import model.Order;
 import model.OrderSignature;
 import model.StatusOrder;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import util.Hash;
+import java.nio.charset.StandardCharsets;
+
 
 public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
@@ -255,6 +260,123 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             throw new RuntimeException(e); // Ném ngoại lệ nếu có lỗi xảy ra
         }
         return result; // Trả về số dòng bị ảnh hưởng
+    }
+    public String getHashByOrderId(int orderId) {
+        String hash = null;
+
+        // Tạo kết nối đến cơ sở dữ liệu
+        try (Connection con = JDBCUtil.getConnection()) {
+
+            // Truy vấn hash từ bảng order_signatures theo order_id
+            String sql = "SELECT hash FROM order_signatures WHERE order_id = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, orderId);  // Set giá trị order_id vào câu lệnh SQL
+
+                // Thực thi câu lệnh và lấy kết quả
+                try (ResultSet rs = ps.executeQuery()) {
+                    // Nếu tìm thấy hash trong cơ sở dữ liệu
+                    if (rs.next()) {
+                        hash = rs.getString("hash");  // Lấy giá trị hash
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching hash for orderId: " + orderId, e);
+        }
+
+        return hash;
+    }
+
+
+// Các phương thức còn lại trong lớp OrderSignatureDAO (selectAll, selectById, insert, update, delete...)
+
+    public static boolean validateOrderHash(int orderId) throws SQLException, NoSuchAlgorithmException {
+        // Lấy dữ liệu serialized cho đơn hàng từ phương thức đã viết
+        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+
+        String serializedData = orderSignatureDAO.getSerializedDataForOrder(orderId);
+
+        // Tính toán hash từ serializedData
+        String calculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
+
+        // Lấy hash đã lưu từ cơ sở dữ liệu
+        String storedHash = orderSignatureDAO.getHashByOrderId(orderId);
+
+        // So sánh hash tính toán và hash đã lưu
+        return storedHash != null && storedHash.equals(calculatedHash);
+    }
+    public String getSerializedDataForOrder(int orderId) throws SQLException {
+        StringBuilder serializedData = new StringBuilder();
+
+        // Câu lệnh SQL để lấy dữ liệu từ các bảng, chỉ lấy các trường cần thiết
+        String query = "SELECT " +
+                "u.user_id, " +
+                "u.email, " +
+                "o.order_id, " +
+                "o.total_price, " +
+                "o.booking_date, " +
+                "o.shipping_fee " +
+                "FROM orders o " +
+                "JOIN users u ON o.user_id = u.user_id " +
+                "WHERE o.order_id = ?";  // Sử dụng orderId từ tham số
+
+        try (Connection con = JDBCUtil.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, orderId);  // Gán giá trị orderId vào câu lệnh SQL
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Chỉ lấy thông tin cần thiết và tạo chuỗi serialized
+                    serializedData.append("user_id:").append(rs.getInt("user_id")).append(",");
+                    serializedData.append("email:").append(rs.getString("email")).append(",");
+                    serializedData.append("order_id:").append(rs.getInt("order_id")).append(",");
+                    serializedData.append("total_price:").append(rs.getDouble("total_price")).append(",");
+
+                    // Định dạng ngày giờ booking
+                    java.sql.Timestamp timestamp = rs.getTimestamp("booking_date");
+                    if (timestamp != null) {
+                        // Định dạng ngày giờ đầy đủ (yyyy-MM-dd HH:mm:ss)
+                        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp);
+                        serializedData.append("booking_date:").append(formattedDate).append(",");
+                    } else {
+                        serializedData.append("booking_date:null,");
+                    }
+
+                    serializedData.append("shipping_fee:").append(rs.getDouble("shipping_fee")).append(",");
+                }
+            }
+        }
+
+        // Không cần xóa dấu phẩy cuối cùng, vì bạn muốn dấu phẩy luôn có ở cuối.
+        return serializedData.toString();
+    }
+
+
+    // Main method for testing the validateOrderHash method
+    public static void main(String[] args) throws SQLException {
+        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+        int orderId = 17; // Example order ID to test with
+
+        String serializedData = orderSignatureDAO.getSerializedDataForOrder(orderId);
+        System.out.println(serializedData);
+
+
+        try {
+            // Validate the order hash for the specified orderId
+            boolean isValid = validateOrderHash(orderId);
+
+            if (isValid) {
+                System.out.println("Đơn hàng ko bị thay đổi");
+            } else {
+                System.out.println("Đơn hàng bị thay đổi");
+            }
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Hashing error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+        }
     }
 
 
