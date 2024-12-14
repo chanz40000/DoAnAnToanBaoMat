@@ -216,6 +216,7 @@
 											<thead>
 											<tr>
 												<th>Tên khóa</th>
+												<th>Ngày tạo</th>
 												<th>Ngày hết hạn</th>
 												<th>Hành động</th>
 											</tr>
@@ -227,6 +228,7 @@
 											<tr>
 												<td>Khóa ${counter}</td>
 												<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
+												<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
 												<td>
 													<button class="btn btn-warning" data-toggle="modal" data-target="#keyModal">Lộ khóa</button>
 													<button class="btn btn-danger">Xóa khóa</button>
