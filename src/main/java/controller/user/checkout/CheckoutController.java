@@ -259,5 +259,3 @@ public class CheckoutController extends HttpServlet {
         request.setAttribute("orderJson", orderJson);
     }
 }
-
-
