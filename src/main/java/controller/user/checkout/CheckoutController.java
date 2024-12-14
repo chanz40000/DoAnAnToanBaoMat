@@ -163,14 +163,15 @@ public class CheckoutController extends HttpServlet {
                 try {
                 // Serialize dữ liệu để tạo chuỗi hash
                 StringBuilder serializedData = new StringBuilder();
+                Order orderInDatabase = orderDAO.selectById(order.getOrderId());
                 serializedData.append("user_id:").append(user.getUserId()).append(",");
                 serializedData.append("email:").append(user.getEmail()).append(",");
-                serializedData.append("order_id:").append(order.getOrderId()).append(",");
-                serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
-                serializedData.append("booking_date:").append(order.getBookingDate()).append(",");
-                serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
+                serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
+                serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
+                serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
+                serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
 
-                for (CartItem cartItem : cart.getCart_items()) {
+                for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
                     serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
                     serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
                     serializedData.append("price:").append(cartItem.getPrice()).append(",");
@@ -180,6 +181,10 @@ public class CheckoutController extends HttpServlet {
                 // Tính hash từ dữ liệu serialize
 
                     String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
+
+                    System.out.println("Serialized Data (Checkout): " + serializedData.toString());
+                    System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
+
                     OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
                     StatusOrder statusOrder1 = new StatusOrder(11);
                     OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
