@@ -112,8 +112,8 @@ public class OrderDAO extends AbsDAO<Order>{
             String sql = "UPDATE orders " +
                     "SET status_id = 6 " +
                     "WHERE status_id = 11 " +
-//                    "AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24";
-                    "AND TIMESTAMPDIFF(MINUTE, booking_date, NOW()) >= 1";
+                    "AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24";
+//                    "AND TIMESTAMPDIFF(MINUTE, booking_date, NOW()) >= 1";
             PreparedStatement st = con.prepareStatement(sql);
             rowsUpdated = st.executeUpdate();
             JDBCUtil.closeConnection(con);
