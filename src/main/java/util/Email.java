@@ -37,7 +37,8 @@ public class Email {
 		//su dung server de gui mail
 		props.put("mail.smtp.host", "smtp.gmail.com");//SMTP HOST
 		//
-		props.put("mail.smtp.port", "smtp.gmail.com");//TLS 587 SSL 465
+//		props.put("mail.smtp.port", "smtp.gmail.com");//TLS 587 SSL 465
+		props.put("mail.smtp.port", "587");//TLS 587 SSL 465
 		//khi su dung host de gui mail thi phai dang nhap
 		props.put("mail.smtp.auth", "true");
 		//
@@ -58,8 +59,8 @@ public class Email {
 		MimeMessage msg = new MimeMessage(session);
 
 		try {
-			//kieu noi dung
-			msg.addHeader("Content-type", "test/HTML; charset=UTF-8");
+			// Cài đặt kiểu nội dung và mã hóa UTF-8
+			msg.setHeader("Content-type", "text/html; charset=UTF-8");
 
 			//nguoi gui
 			msg.setFrom(from);
@@ -68,7 +69,7 @@ public class Email {
 			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
 
 			//tieu de
-			msg.setSubject(subject);
+			msg.setSubject(subject, "UTF-8");
 
 			//quy dinh ngay gui
 			msg.setSentDate(new Date());
@@ -77,8 +78,6 @@ public class Email {
 			//msg.setReplyTo(null)
 
 			//noi dung
-
-
 			msg.setContent(
 					"<!DOCTYPE html>\r\n"
 							+ "<html>\r\n"
@@ -91,7 +90,7 @@ public class Email {
 							+ "<p>"+noiDung+"</p>\r\n"
 							+"<img src=\"https://i.pinimg.com/564x/44/5f/52/445f522692dfd26142559260b61daf69.jpg\" alt=\"\" width=\"70\" height=\"70\" >"
 							+ "</body>\r\n"
-							+ "</html>", "text/html");
+							+ "</html>", "text/html; charset=UTF-8");
 
 			//gui email
 			Transport.send(msg);

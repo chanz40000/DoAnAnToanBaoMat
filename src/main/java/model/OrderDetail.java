@@ -1,12 +1,13 @@
 package model;
 
-public class OrderDetail {
+import java.io.Serializable;
+
+public class OrderDetail  implements Serializable {
     private int detailId;
     private Order order;
     private Product product;
     private int quantity;
     private double price;
-
     public OrderDetail(int detailId, Order order, Product product, int quantity, double price) {
         this.detailId = detailId;
         this.order = order;
@@ -14,7 +15,13 @@ public class OrderDetail {
         this.quantity = quantity;
         this.price = price;
     }
-
+    public OrderDetail(Product product, int quantity) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null");
+        }
+        this.product = product;
+        this.quantity = quantity;
+    }
     public int getDetailId() {
         return detailId;
     }
@@ -54,4 +61,9 @@ public class OrderDetail {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    public int getProductId() {
+        return product != null ? product.getProductId() : 0; // Trả về 0 nếu product null
+    }
+
 }

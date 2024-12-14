@@ -104,13 +104,14 @@ public class RegisterForm extends HttpServlet {
 
                 KeyUserDAO keyUserDAO = new KeyUserDAO();
                 keyUserDAO.insert(new KeyUser(customer, publicKey, new Date(System.currentTimeMillis()), new Date(2999, 12, 30), "ON"));
-                String emailSubject = "Thông báo đăng ký tài khoản thành công";
-                String emailBody = "Chào bạn,\n\n" +
-                        "Chúc mừng bạn đã trở thành khách hàng của cửa hàng chúng tôi! \n\n" +
-                        "Khóa bảo mật của bạn là: \n" + privateKey + "\n\n" +
-                        "Vui lòng giữ khóa bảo mật này an toàn và không chia sẻ với người khác.\n\n" +
-                        "Trân trọng,\nCửa hàng của chúng tôi.";
+                String emailSubject = "Thong bao dang ky tai khoan thanh cong!";
+                String emailBody = "Hellooo,\n\n" +
+                        "Chuc mung ban da tro thanh khach hang than thiet cua chung toi! \n\n" +
+                        "Khoa bao mat cua ban la: \n" + privateKey + "\n\n" +
+                        "Vui long gi khoa va khong chia se voi nguoi khac.\n\n" +
+                        "Tran trong,\nCua hang sach cutee.";
 
+                System.out.println(privateKey);
                 Email.sendEmail(email, emailBody, emailSubject);
 
                 url = "/WEB-INF/book/login.jsp";

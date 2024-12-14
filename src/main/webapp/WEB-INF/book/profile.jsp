@@ -1,5 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page isELIgnored="false" %>
+<%@ page import="util.FormatCurrency"%>
 
 <!DOCTYPE html>
 <html>
@@ -116,6 +120,7 @@
 </div>
 
 <jsp:include page="navbar.jsp"/>
+<jsp:useBean id="keyUserDAO" class="database.KeyUserDAO"/>
 <div class="full_container">
 	<div class="inner_container">
 		<div id="content">
@@ -205,7 +210,8 @@
 										Dưới đây là các khóa xác thực của bạn
 									</div>
 									<div class="card-body">
-										<p>Bạn có thể tạo nhiều khóa nhưng chỉ chọn 1 khóa để sử dụng, hãy xóa những khóa bạn không sử dụng.</p>
+										<div style="text-align: center;color: red" class="red" id="baoLoi1">${message} </div>
+
 										<table>
 											<thead>
 											<tr>
@@ -215,31 +221,62 @@
 											</tr>
 											</thead>
 											<tbody>
+											<c:set var="id" value="${sessionScope.userC.userId}"/>
+											<c:set var="counter" value="1" scope="page" /> <!-- Khởi tạo biến đếm -->
+                                            <c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
 											<tr>
-												<td>Khóa 1</td>
-												<td>2024-12-31</td>
+												<td>Khóa ${counter}</td>
+												<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
 												<td>
-													<button class="btn btn-warning">Báo cáo</button>
+													<button class="btn btn-warning" data-toggle="modal" data-target="#keyModal">Lộ khóa</button>
 													<button class="btn btn-danger">Xóa khóa</button>
 													<button class="btn btn-success">Sử dụng</button>
 												</td>
 											</tr>
-											<tr>
-												<td>Khóa 2</td>
-												<td>2025-01-15</td>
-												<td>
-													<button class="btn btn-warning">Báo cáo</button>
-													<button class="btn btn-danger">Xóa khóa</button>
-													<button class="btn btn-success">Sử dụng</button>
-												</td>
-											</tr>
+												<c:set var="counter" value="${counter + 1}" /> <!-- Tăng biến đếm -->
 											<!-- Thêm nhiều khóa khác -->
+											</c:forEach>
 											</tbody>
 										</table>
 									</div>
 								</div>
 							</div>
 						</div>
+						<!-- Modal for entering and uploading the key -->
+						<div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="keyModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="keyModalLabel">Nhập khóa hoặc tải lên từ tệp</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<c:if test="${not empty message}">
+										<div class="alert ${message.contains('thành công') ? 'alert-success' : 'alert-danger'}">
+												${message}
+										</div>
+									</c:if>
+
+									<div class="modal-body">
+
+										<form id="keyForm" method="post" action="CreateKeyServlet">
+											<div class="form-group">
+												<label for="inputKey">Nhập khóa của bạn:</label>
+												<textarea class="form-control" name="keyContent" id="inputKey" rows="4" placeholder="Nhập khóa tại đây"></textarea>
+											</div>
+											<div class="form-group mt-3">
+												<label for="uploadFile">Hoặc tải khóa từ tệp:</label>
+												<input type="file" class="form-control-file"  id="uploadFile" accept=".txt" />
+											</div>
+											<button type="button" class="btn btn-primary mt-3" id="loadFileButton">Tải tệp</button>
+											<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+
 
 					</div>
 				</div>
@@ -258,6 +295,39 @@
 			<circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg>
 	</div>
 </div>
+<script>
+	// Handle the file load event
+	document.getElementById('loadFileButton').addEventListener('click', function() {
+		const fileInput = document.getElementById('uploadFile');
+		const file = fileInput.files[0];
+
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				const content = e.target.result;
+				document.getElementById('inputKey').value = content; // Load content into the textarea
+			};
+			reader.readAsText(file);
+		} else {
+			alert('Vui lòng chọn một tệp!');
+		}
+	});
+
+	// // Handle form submission (optional, based on your backend handling)
+	// document.getElementById('keyForm').addEventListener('submit', function(e) {
+	// 	e.preventDefault();
+	//
+	// 	const key = document.getElementById('inputKey').value;
+	//
+	// 	if (key.trim() === '') {
+	// 		alert('Vui lòng nhập khóa!');
+	// 	} else {
+	// 		// You can send the key to the server via AJAX or form submission
+	// 		alert('Khóa đã được tạo: ' + key);
+	// 		$('#keyModal').modal('hide'); // Hide the modal after submission
+	// 	}
+	// });
+</script>
 
 	<script src="js/jquery-3.3.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
@@ -267,6 +337,10 @@
 	<script src="js/mixitup.min.js"></script>
 	<script src="js/owl.carousel.min.js"></script>
 	<script src="js/main.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
 </body>
 </html>

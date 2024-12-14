@@ -6,6 +6,7 @@ public class StatusOrder {
     private int statusId;
     private String statusName;
 
+
     public StatusOrder() {
     }
 

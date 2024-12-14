@@ -2,9 +2,8 @@
 <!DOCTYPE html>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@page isELIgnored="false" %>
 <%@ page import="util.FormatCurrency"%>
+<%@page isELIgnored="false" %>
 <html lang="zxx">
 
 <head>
@@ -49,6 +48,11 @@
             cursor: pointer;
             outline: inherit;
             top: 12px;
+
+
+
+
+
         }
         .fa-regular.fa-sun{
             font-size: 20px;
@@ -59,6 +63,7 @@
             font-size: 20px;
 
         }
+
         .sss{
             background-color: #f1f1f1;
         }
@@ -98,19 +103,13 @@
             flex-direction: row;
             justify-content: space-between;
         }
-
-        .fa-xmark{
-            position: absolute;
-            top: 3px;
-            left: 5px;
-        }
         .tabLef{
             padding-top: 20px;
 
         }
         .totalOrder{
             color: #a71d2a;
-            font-size: 22px;
+            font-size: 25px;
             font-weight: bold;
         }
         .information span{
@@ -121,6 +120,48 @@
             font-size: 18px;
             padding-bottom: 10px;
         }
+        .order{
+            padding-top: 20px;
+            padding-left: 80px;
+        }
+        .custom-list {
+            list-style-type: none; /* Loại bỏ dấu chấm mặc định */
+            padding-top: 10px;
+        }
+
+        .custom-list li {
+            font-size: 20px; /* Kích thước văn bản của nội dung */
+            margin-bottom: 10px; /* Khoảng cách giữa các phần tử */
+        }
+
+        .custom-list li::before {
+            content: counter(item) ". "; /* Tự động thêm số thứ tự */
+            counter-increment: item; /* Tăng biến đếm */
+            font-size: 24px; /* Tăng kích thước của số */
+            font-weight: bold; /* Làm đậm số */
+            color: red; /* Màu đỏ cho số */
+        }
+
+        .custom-list {
+            counter-reset: item; /* Đặt lại bộ đếm */
+        }
+        .linkdown {
+            color: #a71d2a; /* Màu chữ mặc định */
+            text-decoration: none; /* Bỏ gạch chân nếu muốn */
+        }
+
+        .linkdown:hover {
+            color: #a71d2a; /* Màu chữ khi hover */
+            text-decoration: underline; /* Gạch chân khi hover nếu muốn */
+        }
+
+        .linkdown:active,
+        .linkdown:focus,
+        .linkdown:visited {
+            color: #a71d2a; /* Giữ nguyên màu chữ ở các trạng thái khác */
+            text-decoration: none; /* Bỏ gạch chân nếu có */
+        }
+
     </style>
 </head>
 
@@ -129,23 +170,21 @@
 <div id="preloder">
     <div class="loader"></div>
 </div>
+
+
 <jsp:include page="navbar.jsp"/>
-<%--<jsp:useBean id="orderDetailDAO" class="database.OrderDetailDAO"/>--%>
-<%--<jsp:useBean id="orderDAO" class="database.OrderDAO"/>--%>
-<%--<jsp:useBean id="userDAO" class="database.UserDAO"/>--%>
-<%--<c:set var="id" value="${sessionScope.userC.userId}"/>--%>
-<%--<c:set var="user" value="${userDAO.selectById(id)}"/>--%>
-<%--<c:set var="Orders" value="${sessionScope.order.orderId}"/>--%>
+
+
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-section set-bg" data-setbg="img/hinhnen.png">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
                 <div class="breadcrumb__text">
-                    <h2>Đơn hàng</h2>
+                    <h2>Xác nhận chữ ký</h2>
                     <div class="breadcrumb__option">
-                        <a href="Index">Trang chủ</a>
-                        <span>Đơn hàng</span>
+                        <a href="Index">Home</a>
+                        <span>Xác nhận chữ ký</span>
                     </div>
                 </div>
             </div>
@@ -154,7 +193,7 @@
 </section>
 <section class="sss">
     <div class="d-flex justify-content-center" style="padding-top: 30px">
-        <p style="font-size: 50px; font-weight: bold; color: black">Chi tiết đơn hàng</p>
+        <p style="font-size: 50px; font-weight: bold; color: black">Xác nhận chữ ký</p>
     </div>
     <div class="container">
         <div class="row">
@@ -202,59 +241,70 @@
                         </c:if>
                     </div>
                     <hr>
-                    <div class="totalOrder">
-                       Tổng tiền: ${FormatCurrency.formatCurrency(order.totalPrice)}
-                    </div>
-                    <hr>
-                </div>
-
-            </div>
-            <div class="col-lg-7 ">
-                <div class="order">
                     <div class="content">
-                        <h3>Thông tin sản phẩm</h3>
+                        <h3>Thông tin sản phẩm của đơn hàng</h3>
                         <c:forEach var="orderDetail" items="${orderDetailList}">
-                        <div class="fromOrder">
+                            <div class="fromOrder">
 
-                            <div class="orderDetailProduct">
-                                <div class="img">
-                                    <img  width="80px" height="100px" src="/image/${orderDetail.product.image}" alt="">
-                                </div>
-                                <div class="productDetail">
-                                    <div class="productName">
-                                        <h3>${orderDetail.product.product_name} <span style="font-size: 20px">x ${orderDetail.quantity}</span></h3>
+                                <div class="orderDetailProduct">
+                                    <div class="img">
+                                        <img  width="100px" height="130px" src="/image/${orderDetail.product.image}" alt="">
                                     </div>
-                                    <div class="category">
-                                        <p style="font-size: 15px">Thể loại: ${orderDetail.product.category.categoryName}</p>
-                                    </div>
-                                    <div class="priceDetail" style="display: flex" >
-                                        <div class="productPrice">
-                                            <h4>${FormatCurrency.formatCurrency(orderDetail.product.price)}</h4>
+                                    <div class="productDetail">
+                                        <div class="productName">
+                                            <h3>${orderDetail.product.product_name} <span style="font-size: 20px">x ${orderDetail.quantity}</span></h3>
                                         </div>
-                                        <div class="productPriceTotal">
-                                            <c:set var="total" value="${orderDetail.quantity * orderDetail.product.price}"/>
-                                            <h4 style="color: #ce0f21; font-weight: bold">Tổng: ${FormatCurrency.formatCurrency(total)}</h4>
+                                        <div class="category">
+                                            <p style="font-size: 15px">Thể loại: ${orderDetail.product.category.categoryName}<br>ID sản phẩm: ${orderDetail.product.productId}</p>
+                                        </div>
+
+                                        <div class="priceDetail" style="display: flex" >
+                                            <div class="productPrice">
+                                                <h4>${FormatCurrency.formatCurrency(orderDetail.product.price)}</h4>
+                                            </div>
+                                            <div class="productPriceTotal">
+                                                <c:set var="total" value="${orderDetail.quantity * orderDetail.product.price}"/>
+                                                <h4 style="color: #ce0f21; font-weight: bold">Tổng: ${FormatCurrency.formatCurrency(total)}</h4>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                <hr>
                             </div>
-                            <hr>
-                        </div>
                         </c:forEach>
+                        <div class="totalOrder">
+                            Tổng tiền: ${FormatCurrency.formatCurrency(order.totalPrice)}
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+
+            </div>
+            <div class="col-lg-7">
+                <div class="order">
+                    <h4 style="color: #a71d2a; font-weight: bold">Hướng dẫn lấy chữ ký</h4>
+                    <ul class="custom-list">
+                        <li>Tải tool của chúng tôi để tạo ra chữ ký của bạn. <a class="linkdown" href="DownLoadTool">Tại đây</a></li>
+                        <li>Kiểm tra email của bạn! Lấy mã chúng tôi gửi và tiến hành ký tên</li>
+                        <li>Lấy chữ ký và nhập vào ô dưới đây (Hướng dẫn xài tool)</li>
+                    </ul>
+                    <div class="signature">
+                        <form id="verifyForm">
+                            <div id="verifyResult" style="color: red; font-weight: bold;"></div>
+                            <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
+                            <br>
+                            <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
+                                Xác nhận đơn hàng
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
+
+
         </div>
     </div>
 </section>
-
-<%--</c:if>--%>
-
-
-<!-- Product Section Begin -->
-
-
-<!-- Product Section End -->
 
 <!-- Footer Section Begin -->
 <footer class="footer spad">
@@ -272,6 +322,7 @@
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.80/darkreader.min.js"></script>
+
 
 <script>
     const toggleDarkModeButton = document.getElementById("toggle-dark-mode");
@@ -294,40 +345,41 @@
         }
     });
 
+    // Set the initial button text and Font Awesome icon
+
+
+    // Enable Dark Reader when the page loads
+
 </script>
 <script>
-    $(document).ready(function (){
-        // Chọn tất cả các phần tử có class CancelOrderBt
-        let cancelOrderButtons = document.querySelectorAll('.CancelOrderBt');
+    document.getElementById("verifyButton").addEventListener("click", function () {
+        const signature = document.getElementById("signatureInput").value;
 
-        // Duyệt qua từng phần tử và thêm sự kiện click
-        cancelOrderButtons.forEach(function(cancelOrderButton) {
-            cancelOrderButton.addEventListener("click", function (){
-                // Lấy phần tử cha của nút hiện tại
-                let parentElement = cancelOrderButton.closest('.fromOrder');
-                // Chọn các phần tử overlay và reasonCancel từ phần tử cha
-                let overlay = parentElement.querySelector('.overlay');
-                let reasonCancel = parentElement.querySelector('.reasonCancel');
-                let closeReason = reasonCancel.querySelector('.closeReason');
+        if (!signature.trim()) {
+            document.getElementById("verifyResult").textContent = "Vui lòng nhập chữ ký!";
+            return;
+        }
 
-                // Hiển thị các phần tử
-                overlay.style.display = "block";
-                reasonCancel.style.display = "block";
-                closeReason.style.display = "block";
-
-                // Thêm sự kiện click cho nút đóng
-                closeReason.addEventListener("click", function (){
-                    overlay.style.display = "none";
-                    reasonCancel.style.display = "none";
-                    closeReason.style.display = "none";
-                });
+        fetch("VerifySignature?signature=" + encodeURIComponent(signature))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Chuyển hướng trang nếu xác thực thành công
+                    window.location.href = data.redirectUrl;
+                } else {
+                    // Hiển thị thông báo lỗi
+                    document.getElementById("verifyResult").style.color = "red";
+                    document.getElementById("verifyResult").textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("verifyResult").textContent = "Đã xảy ra lỗi khi gửi yêu cầu.";
             });
-        });
     });
 
 </script>
-<script src="https://cdn.botpress.cloud/webchat/v2/inject.js"></script>
-<script src="https://mediafiles.botpress.cloud/1d0997ec-87ba-4ea8-8a5c-c2fba00d5019/webchat/v2/config.js"></script>
+
 </body>
 
 </html>
