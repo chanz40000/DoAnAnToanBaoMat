@@ -692,13 +692,113 @@ INSERT INTO orderstatus (status_name) VALUES
 ('Chờ xác thực chữ ký'),
 ('Đã xác thực chữ ký');
 
---
--- Dumping events for database 'book'
---
+-- Thay đổi bảng log
+ALTER TABLE log
+MODIFY COLUMN idlog INT NOT NULL AUTO_INCREMENT;
 
---
--- Dumping routines for database 'book'
---
+-- Trigger để lưu vào log giá trị cũ và giá trị mới sau khi thực hiện update
+DELIMITER $$
+
+CREATE TRIGGER before_order_update
+BEFORE UPDATE ON orders
+FOR EACH ROW
+BEGIN
+    DECLARE oldValue TEXT;
+    DECLARE newValue TEXT;
+    DECLARE preValue TEXT;
+    DECLARE newValueText TEXT;
+
+    -- Initialize the preValue and newValueText strings
+    SET preValue = CONCAT('OrderId:', OLD.order_id, ' Cũ: ');
+    SET newValueText = CONCAT('OrderId:', NEW.order_id, ' Mới: ');
+
+    -- Check if total_price is changed
+    IF OLD.total_price != NEW.total_price THEN
+        SET preValue = CONCAT(preValue, 'total_price = ', OLD.total_price, ', ');
+        SET newValueText = CONCAT(newValueText, 'total_price = ', NEW.total_price, ', ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'total_price = ', OLD.total_price, ', ');
+        SET newValueText = CONCAT(newValueText, 'total_price = ', OLD.total_price, ', ');
+    END IF;
+
+    -- Check if nameConsignee is changed
+    IF OLD.nameConsignee != NEW.nameConsignee THEN
+        SET preValue = CONCAT(preValue, 'nameConsignee = "', OLD.nameConsignee, '", ');
+        SET newValueText = CONCAT(newValueText, 'nameConsignee = "', NEW.nameConsignee, '", ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'nameConsignee = "', OLD.nameConsignee, '", ');
+        SET newValueText = CONCAT(newValueText, 'nameConsignee = "', OLD.nameConsignee, '", ');
+    END IF;
+
+    -- Check if phone is changed
+    IF OLD.phone != NEW.phone THEN
+        SET preValue = CONCAT(preValue, 'phone = "', OLD.phone, '", ');
+        SET newValueText = CONCAT(newValueText, 'phone = "', NEW.phone, '", ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'phone = "', OLD.phone, '", ');
+        SET newValueText = CONCAT(newValueText, 'phone = "', OLD.phone, '", ');
+    END IF;
+
+    -- Check if address is changed
+    IF OLD.address != NEW.address THEN
+        SET preValue = CONCAT(preValue, 'address = "', OLD.address, '", ');
+        SET newValueText = CONCAT(newValueText, 'address = "', NEW.address, '", ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'address = "', OLD.address, '", ');
+        SET newValueText = CONCAT(newValueText, 'address = "', OLD.address, '", ');
+    END IF;
+
+    -- Check if status_id is changed
+    IF OLD.status_id != NEW.status_id THEN
+        SET preValue = CONCAT(preValue, 'status_id = ', OLD.status_id, ', ');
+        SET newValueText = CONCAT(newValueText, 'status_id = ', NEW.status_id, ', ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'status_id = ', OLD.status_id, ', ');
+        SET newValueText = CONCAT(newValueText, 'status_id = ', OLD.status_id, ', ');
+    END IF;
+
+    -- Check if booking_date is changed
+    IF OLD.booking_date != NEW.booking_date THEN
+        SET preValue = CONCAT(preValue, 'booking_date = "', OLD.booking_date, '", ');
+        SET newValueText = CONCAT(newValueText, 'booking_date = "', NEW.booking_date, '", ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'booking_date = "', OLD.booking_date, '", ');
+        SET newValueText = CONCAT(newValueText, 'booking_date = "', OLD.booking_date, '", ');
+    END IF;
+
+    -- Check if note is changed
+    IF OLD.note != NEW.note THEN
+        SET preValue = CONCAT(preValue, 'note = "', OLD.note, '", ');
+        SET newValueText = CONCAT(newValueText, 'note = "', NEW.note, '", ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'note = "', OLD.note, '", ');
+        SET newValueText = CONCAT(newValueText, 'note = "', OLD.note, '", ');
+    END IF;
+
+    -- Check if shipping_fee is changed
+    IF OLD.shipping_fee != NEW.shipping_fee THEN
+        SET preValue = CONCAT(preValue, 'shipping_fee = ', OLD.shipping_fee, ', ');
+        SET newValueText = CONCAT(newValueText, 'shipping_fee = ', NEW.shipping_fee, ', ');
+    ELSE
+        SET preValue = CONCAT(preValue, 'shipping_fee = ', OLD.shipping_fee, ', ');
+        SET newValueText = CONCAT(newValueText, 'shipping_fee = ', OLD.shipping_fee, ', ');
+    END IF;
+
+    -- If any change occurred, insert one log entry
+    IF LENGTH(preValue) > 0 THEN
+        -- Remove the trailing comma and space from the preValue and newValueText strings
+        SET preValue = LEFT(preValue, LENGTH(preValue) - 2);
+        SET newValueText = LEFT(newValueText, LENGTH(newValueText) - 2);
+
+        -- Insert a single log entry for all changes
+        INSERT INTO log (level, address, preValue, value, national, ipAddress, time)
+        VALUES ('warn', '128.0.0.1', preValue, newValueText, 'Vietnam', NULL, NOW());
+    END IF;
+
+END$$
+
+DELIMITER ;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
