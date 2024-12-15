@@ -139,6 +139,12 @@
             flex-direction: row;
             justify-content: space-between;
         }
+        .productName{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            font-weight: bold;
+        }
         .quantityTotalPrices{
             display: flex;
             flex-direction: row;
@@ -298,14 +304,16 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div id="statusXacNhanChuKy" class="container tab-pane active">
-                                <c:set var="statusXacNhanChuKy" value="11"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusId(id, statusXacNhanChuKy)}">
+                                <c:set var="statusXacMinhChuKy" value="1"/>
+                                <c:set var="statusOrderChuKy" value="11"/>
+                                <c:set var="statusXacMinhCoThayDoi" value="2"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusOrderChuKy)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusXacNhanChuKy)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusOrderChuKy)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
@@ -314,10 +322,20 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+
                                                 </div>
                                                 <div class="dateOrder">
                                                     <p>${order.bookingDate}</p>
@@ -354,7 +372,26 @@
                                                     Xác nhận
                                                 </button>
 
-                                            <%--                                      --%>
+                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                <!-- Unique container for each cancel section -->
+                                                <div class="overlay" style="display:none;"></div>
+                                                <div class="reasonCancel" style="display:none;">
+                                                    <div class="re">
+                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
+                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
+                                                        <form action="ChangeStatusOrderUser" method="post">
+                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
+                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
+                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
+                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
+                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
+                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                            <input type="hidden" name="action" value="CancelOrder1" />
+                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -362,14 +399,14 @@
                             </div>
                             <div id="statusXacNhan" class="container tab-pane">
                                 <c:set var="statusXacNhan" value="1"/>
-                                <c:set var="statusXacNhanChuKy" value="12"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
+                                <c:set var="statusThanhToan" value="9"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusThanhToan)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusThanhToan)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
@@ -378,7 +415,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -412,6 +458,15 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
+                                                <c:if test="${order.status.statusId == 9}">
+                                                    <button class="badge bg-success me-1 CancelOrderBt"
+                                                            style="font-size: 22px; border: none; width: auto; color: white"
+                                                    >
+                                                        Thanh toán
+                                                    </button>
+                                                </c:if>
+
+
                                                 <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
                                                 <!-- Unique container for each cancel section -->
                                                 <div class="overlay" style="display:none;"></div>
@@ -455,7 +510,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -550,7 +614,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -626,7 +699,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -719,7 +801,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -774,7 +865,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>

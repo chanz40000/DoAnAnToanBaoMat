@@ -211,7 +211,28 @@ public class Email {
 		return htmlCode;
 	}
 
+	public static void sendEmailHashOrderToUser(String name, String hash, Order order) {
+		String emailSubject = "Mã xác thực của đơn hàng MDH" +order.getOrderId()+ " bạn cần ký tên";
+		String emailBody = "<!DOCTYPE html>" +
+				"<html>" +
+				"<head>" +
+				"<meta charset='UTF-8'>" +
+				"<title>Xác thực chữ ký</title>" +
+				"</head>" +
+				"<body>" +
+				"<h1>Xin chào " + name + "</h1>" +
+				"<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
+				"<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
+				"<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
+				"<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
+				"<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
+				"<p>Trân trọng,</p>" +
+				"<p>Cửa hàng của chúng tôi</p>" +
+				"</body>" +
+				"</html>";
 
+		Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+	}
 	public static void sendEmailWithAttachment(String to, String subject, String body, String nameFile, String contentFile) {
 		// Configure mail server properties
 		Properties props = new Properties();

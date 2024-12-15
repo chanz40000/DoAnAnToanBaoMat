@@ -197,8 +197,14 @@
                         <c:if test="${order.status.statusId == 11}">
                             <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #f6b422" class="fa-solid fa-clock"></i></div>
                         </c:if>
-                        <c:if test="${order.status.statusId == 12}">
-                            <div style="color: #077800; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                        <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                            <div style="color: #c30404; font-weight: bold"><span>Xác minh chữ ký:</span> ${order.statusSignature.statusSignatureName}</div>
+                        </c:if>
+                        <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                            <div style="color: #c30404; font-weight: bold"><span>Xác minh chữ ký:</span> ${order.statusSignature.statusSignatureName}</div>
+                        </c:if>
+                        <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                            <div style="color: #077800; font-weight: bold"><span>Trạng thái:</span> ${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
                         </c:if>
                     </div>
                     <hr>

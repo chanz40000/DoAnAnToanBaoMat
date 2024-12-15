@@ -31,9 +31,17 @@ public class VerifySignature extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("userC");
         Order order = (Order) session.getAttribute("order");
-
+        ErrorBean eb = new ErrorBean();
         if (user == null || order == null || signature == null) {
-            response.getWriter().write("{\"status\": \"error\", \"message\": \"Thông tin không đầy đủ!\"}");
+            String errorMessage = "Thông tin không đầy đủ!";
+            request.setAttribute("Error", errorMessage);
+            eb.setError(errorMessage);
+            request.setAttribute("errorBean", eb);
+
+            // Forward lại trang verify-order.jsp cùng thông báo lỗi
+            String url = "/WEB-INF/book/verify-order.jsp";
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
             return;
         }
 
@@ -77,21 +85,48 @@ public class VerifySignature extends HttpServlet {
 //            boolean isValid = rsa.verifySignature(orderSignature.getHash(), signature, publicKey);
             boolean isValid = rsa.verifySignature(hash, signature, publicKey);
             if (!isValid) {
-                response.getWriter().write("{\"status\": \"error\", \"message\": \"Chữ ký không hợp lệ!\"}");
+                String errorMessage = "Chữ ký không hợp lệ!";
+                request.setAttribute("Error", errorMessage); // Gán lỗi vào request attribute
+                eb.setError(errorMessage);
+                request.setAttribute("errorBean", eb);
+
+                // Forward lại trang verify-order.jsp cùng thông báo lỗi
+                String url = "/WEB-INF/book/verify-order.jsp";
+                RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                dispatcher.forward(request, response);
                 return;
             }
 
             // Cập nhật trạng thái đơn hàng
-            StatusOrder statusOrder = new StatusOrder(12);
             OrderDAO orderDAO = new OrderDAO();
-            orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
-            orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature, statusOrder);
+            StatusSignature statusSignature = new StatusSignature(3);
 
-            // Trả về URL chuyển hướng
-            response.getWriter().write("{\"status\": \"success\", \"redirectUrl\": \"" + request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId() + "\"}");
+            if (order.getPayment().getPaymentId() == 1){
+                StatusOrder statusOrder = new StatusOrder(9);
+
+                orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
+                orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
+                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
+                String url = request.getContextPath() + "/WEB-INF/book/Vnpay.jsp";
+                RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                dispatcher.forward(request, response);
+
+                return;
+            }else {
+
+                StatusOrder statusOrder = new StatusOrder(1);
+                orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
+                orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
+                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
+
+                String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+                response.sendRedirect(redirectUrl);
+            }
+            eb.setError((String) request.getAttribute("Error"));
+            request.setAttribute("errorBean", eb);
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.getWriter().write("{\"status\": \"error\", \"message\": \"Đã xảy ra lỗi!\"}");
         }
     }
 

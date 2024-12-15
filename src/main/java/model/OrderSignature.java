@@ -7,25 +7,23 @@ public class OrderSignature {
     private Order orderId;
     private String hash;
     private String signature;
-    private StatusOrder statusId;
+
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
     // Constructor
-    public OrderSignature(int id, Order orderId, String hash, String signature, StatusOrder statusId, Timestamp createdAt, Timestamp updatedAt) {
+    public OrderSignature(int id, Order orderId, String hash, String signature,  Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.orderId = orderId;
         this.hash = hash;
         this.signature = signature;
-        this.statusId = statusId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    public OrderSignature(Order orderId, String hash, StatusOrder statusId) {
+    public OrderSignature(Order orderId, String hash) {
         this.orderId = orderId;
         this.hash = hash;
-        this.statusId = statusId;
     }
 
     // Getters and Setters
@@ -80,13 +78,7 @@ public class OrderSignature {
         this.orderId = orderId;
     }
 
-    public StatusOrder getStatusId() {
-        return statusId;
-    }
 
-    public void setStatusId(StatusOrder statusId) {
-        this.statusId = statusId;
-    }
 
     @Override
     public String toString() {
@@ -95,7 +87,6 @@ public class OrderSignature {
                 ", orderId=" + orderId +
                 ", hash='" + hash + '\'' +
                 ", signature='" + signature + '\'' +
-                ", statusId=" + statusId +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
