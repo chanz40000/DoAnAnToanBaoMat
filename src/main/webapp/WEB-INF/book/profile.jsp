@@ -218,25 +218,28 @@
 												<th>Tên khóa</th>
 												<th>Ngày tạo</th>
 												<th>Ngày hết hạn</th>
+												<th>Trạng thái</th>
 												<th>Hành động</th>
 											</tr>
 											</thead>
 											<tbody>
 											<c:set var="id" value="${sessionScope.userC.userId}"/>
-											<c:set var="counter" value="1" scope="page" /> <!-- Khởi tạo biến đếm -->
-                                            <c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
-											<tr>
-												<td>Khóa ${counter}</td>
-												<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
-												<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
-												<td>
-													<button class="btn btn-warning" data-toggle="modal" data-target="#keyModal">Lộ khóa</button>
-													<button class="btn btn-danger">Xóa khóa</button>
-													<button class="btn btn-success">Sử dụng</button>
-												</td>
-											</tr>
+											<c:set var="counter" value="1" scope="page"/> <!-- Khởi tạo biến đếm -->
+											<c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
+												<tr>
+													<td>Khóa ${counter}</td>
+													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
+													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
+													<td>${key.getStatus()}</td> <!-- Hiển thị trạng thái -->
+													<td>
+														<button
+																class="btn ${key.getStatus() == 'ON' ? 'btn-warning' : 'btn-secondary'} " data-toggle="modal" data-target="#keyModal"
+															${key.getStatus() == 'ON' ? '' : 'disabled'}>
+															Lộ khóa
+														</button>
+													</td>
+												</tr>
 												<c:set var="counter" value="${counter + 1}" /> <!-- Tăng biến đếm -->
-											<!-- Thêm nhiều khóa khác -->
 											</c:forEach>
 											</tbody>
 										</table>
