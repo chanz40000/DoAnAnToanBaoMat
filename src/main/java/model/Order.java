@@ -18,9 +18,10 @@ public class Order{
     private String note;
     private double shippingFee;
     private StatusOrder status;
+    private StatusSignature statusSignature;
     private List<OrderDetail> orderDetailList = new ArrayList<OrderDetail>();
 
-    public Order(int orderId, User user, double totalPrice, String nameConsignee, String phone, String address, Payment payment, Timestamp bookingDate, String note, double shippingFee, StatusOrder status) {
+    public Order(int orderId, User user, double totalPrice, String nameConsignee, String phone, String address, Payment payment, Timestamp bookingDate, String note, double shippingFee, StatusOrder status,StatusSignature statusSignature) {
         this.orderId = orderId;
         this.user = user;
         this.totalPrice = totalPrice;
@@ -32,9 +33,18 @@ public class Order{
         this.note = note;
         this.shippingFee = shippingFee;
         this.status = status;
+        this.statusSignature = statusSignature;
     }
 
     public Order() {
+    }
+
+    public StatusSignature getStatusSignature() {
+        return statusSignature;
+    }
+
+    public void setStatusSignature(StatusSignature statusSignature) {
+        this.statusSignature = statusSignature;
     }
 
     public Timestamp getBookingDate() {
