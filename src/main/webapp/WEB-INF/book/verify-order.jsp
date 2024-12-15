@@ -122,7 +122,7 @@
         }
         .order{
             padding-top: 20px;
-            padding-left: 80px;
+            padding-left: 50px;
         }
         .custom-list {
             list-style-type: none; /* Loại bỏ dấu chấm mặc định */
@@ -291,7 +291,10 @@
                     <h4 style="color: #a71d2a; font-weight: bold">Hướng dẫn lấy chữ ký</h4>
                     <ul class="custom-list">
                         <li>Tải tool của chúng tôi để tạo ra chữ ký của bạn. <a class="linkdown" href="DownLoadTool">Tại đây</a></li>
-                        <li>Kiểm tra email của bạn! Lấy mã chúng tôi gửi và tiến hành ký tên</li>
+                        <li>Kiểm tra email của bạn! Chúng tôi đã gửi mã cho bạn.
+                            <a href="#" id="resendHashLink" style="color: #a71d2a; font-weight: bold;">Gửi lại</a>
+                        </li>
+
                         <li>Lấy chữ ký và nhập vào ô dưới đây (Hướng dẫn xài tool)</li>
                     </ul>
                     <div class="signature">
@@ -333,6 +336,27 @@
 <script src="js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.80/darkreader.min.js"></script>
 
+<script>
+    document.getElementById("resendHashLink").addEventListener("click", function(event) {
+        event.preventDefault(); // Ngừng hành động mặc định của link
+
+        // Gửi yêu cầu AJAX đến servlet để gửi lại email
+        fetch("/SendEmailHash", {
+            method: "GET",
+            credentials: "same-origin" // Đảm bảo dữ liệu phiên được gửi đi với yêu cầu
+        })
+            .then(response => response.text())  // Đọc phản hồi từ servlet
+            .then(data => {
+                // Hiển thị thông báo gửi lại email thành công
+                alert("Mã đơn hàng của bạn đã được gửi lại!");
+            })
+            .catch(error => {
+                console.error("Lỗi khi gửi lại email:", error);
+                alert("Có lỗi xảy ra khi gửi lại email.");
+            });
+    });
+
+</script>
 
 <script>
     const toggleDarkModeButton = document.getElementById("toggle-dark-mode");
