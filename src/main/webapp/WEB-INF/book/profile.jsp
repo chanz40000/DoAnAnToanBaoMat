@@ -110,7 +110,35 @@
 		text-align: left;
 		border: 1px solid #ddd;
 	}
+	/* Thông báo mặc định */
+	#notification {
+		display: none; /* Ẩn mặc định */
+		position: fixed;
+		top: 50%; /* Giữa màn hình theo chiều dọc */
+		left: 50%; /* Giữa màn hình theo chiều ngang */
+		transform: translate(-50%, -50%); /* Căn giữa hoàn toàn */
+		padding: 20px 30px;
+		font-size: 16px;
+		border-radius: 8px;
+		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+		z-index: 1000;
+		text-align: center;
+		white-space: pre-line;
+	}
 
+	/* Kiểu lỗi */
+	.error {
+		background-color: #f8d7da;
+		color: #721c24;
+		border: 2px solid #f5c6cb;
+	}
+
+	/* Kiểu thành công */
+	.success {
+		background-color: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
 
 </style>
 
