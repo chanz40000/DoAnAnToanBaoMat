@@ -691,6 +691,7 @@ MODIFY COLUMN booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 INSERT INTO orderstatus (status_name) VALUES 
 ('Chờ xác thực chữ ký'),
 ('Đã xác thực chữ ký');
+('Bị hủy');
 
 -- Thay đổi bảng log
 ALTER TABLE log
@@ -795,6 +796,79 @@ BEGIN
         VALUES ('warn', '128.0.0.1', preValue, newValueText, 'Vietnam', NULL, NOW());
     END IF;
 
+END$$
+
+DELIMITER ;
+-- Drop hết theo thứ tự này
+drop table order_signatures;
+drop table orderdetails;
+drop table orders;
+-- Tạo lại bảng order
+CREATE TABLE orders (
+  order_id int NOT NULL AUTO_INCREMENT,
+  user_id int NOT NULL,
+  total_price decimal(10,2) NOT NULL,
+  nameConsignee varchar(255) NOT NULL,
+  phone text NOT NULL,
+  address text NOT NULL,
+  payment_id int NOT NULL,
+  status_id int,
+  booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  note text,
+  shipping_fee decimal(10,2) DEFAULT NULL,
+  signature_status_id int,
+  PRIMARY KEY (order_id),
+  KEY user_id (user_id),
+  KEY payment_id (payment_id),
+  CONSTRAINT orders_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (user_id),
+  CONSTRAINT orders_ibfk_2 FOREIGN KEY (payment_id) REFERENCES payment_methods (payment_id),
+  CONSTRAINT orders_ibfk_3 FOREIGN KEY (status_id) REFERENCES orderstatus (status_id),
+  CONSTRAINT orders_ibfk_4 FOREIGN KEY (signature_status_id) REFERENCES signature_status (signature_status_id)
+);
+-- Tạo bảng order_signatures
+CREATE TABLE order_signatures (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    hash VARCHAR(255) NOT NULL,
+    signature TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+-- Tạo bảng orderdetails
+CREATE TABLE orderdetails (
+  detail_id int NOT NULL AUTO_INCREMENT,
+  order_id int NOT NULL,
+  product_id int NOT NULL,
+  quantity int NOT NULL,
+  price decimal(10,2) NOT NULL,
+  PRIMARY KEY (detail_id),
+  KEY order_id (order_id),
+  KEY product_id (product_id),
+  CONSTRAINT orderdetails_ibfk_1 FOREIGN KEY (order_id) REFERENCES orders (order_id),
+  CONSTRAINT orderdetails_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (product_id)
+);
+-- 1. Tạo bảng signature_status
+CREATE TABLE signature_status (
+    signature_status_id INT AUTO_INCREMENT PRIMARY KEY,
+    signature_status_name VARCHAR(50) NOT NULL
+);
+-- 2. Thêm các trạng thái mẫu (tuỳ chỉnh theo nhu cầu của bạn)
+INSERT INTO signature_status (signature_status_name) 
+VALUES 
+    ('Chưa xác minh chữ ký'),
+    ('Đơn hàng đã bị thay đổi'),
+    ('Đã xác minh chữ ký');
+DELIMITER $$
+
+CREATE TRIGGER update_order_status_to_cancelled
+AFTER UPDATE ON orders
+FOR EACH ROW
+BEGIN
+    -- Always set the status to "Cancelled" after any update to the order
+    UPDATE orders
+    SET status_id = 13
+    WHERE order_id = NEW.order_id;
 END$$
 
 DELIMITER ;
