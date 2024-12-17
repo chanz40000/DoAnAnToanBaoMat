@@ -67,6 +67,7 @@
         }
         .nav-pills{
             width: 100%;
+            min-width: 1000px;
             margin-left: 0;
             display: flex;
             justify-content: center;
@@ -76,6 +77,7 @@
             display: flex;
             flex-direction: column;
             padding: 3px;
+
         }
         .nav-pills .nav-link{
             font-weight: bold;
@@ -138,6 +140,12 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+        }
+        .productName{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            font-weight: bold;
         }
         .quantityTotalPrices{
             display: flex;
@@ -302,14 +310,16 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div id="statusXacNhanChuKy" class="container tab-pane active">
-                                <c:set var="statusXacNhanChuKy" value="11"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusId(id, statusXacNhanChuKy)}">
+                                <c:set var="statusXacMinhChuKy" value="1"/>
+                                <c:set var="statusOrderChuKy" value="11"/>
+                                <c:set var="statusXacMinhCoThayDoi" value="2"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusOrderChuKy)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusXacNhanChuKy)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusOrderChuKy)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
@@ -318,10 +328,20 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+
                                                 </div>
                                                 <div class="dateOrder">
                                                     <p>${order.bookingDate}</p>
@@ -357,8 +377,27 @@
                                                         onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
                                                     Xác nhận
                                                 </button>
+                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                <!-- Unique container for each cancel section -->
+                                                <div class="overlay" style="display:none;"></div>
+                                                <div class="reasonCancel" style="display:none;">
+                                                    <div class="re">
+                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
+                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
+                                                        <form action="ChangeStatusOrderUser" method="post">
+                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
+                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
+                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
+                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
+                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
+                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                            <input type="hidden" name="action" value="CancelOrder1" />
+                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
 
-                                                    <%--                                      --%>
                                             </div>
                                         </div>
                                     </div>
@@ -366,14 +405,14 @@
                             </div>
                             <div id="statusXacNhan" class="container tab-pane">
                                 <c:set var="statusXacNhan" value="1"/>
-                                <c:set var="statusXacNhanChuKy" value="12"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
+                                <c:set var="statusThanhToan" value="9"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusThanhToan)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusXacNhanChuKy)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusXacNhan, statusThanhToan)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
@@ -382,7 +421,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -416,6 +464,15 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
+                                                <c:if test="${order.status.statusId == 9}">
+                                                    <button class="badge bg-success me-1 CancelOrderBt"
+                                                            style="font-size: 22px; border: none; width: auto; color: white"
+                                                    >
+                                                        Thanh toán
+                                                    </button>
+                                                </c:if>
+
+
                                                 <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
                                                 <!-- Unique container for each cancel section -->
                                                 <div class="overlay" style="display:none;"></div>
@@ -441,6 +498,7 @@
                                     </div>
                                 </c:forEach>
                             </div>
+
                             <div id="statusBiThayDoi" class="container tab-pane fade">
                                 <c:set var="statusChanged" value="changed"/> <!-- Biến để xác định các đơn hàng bị thay đổi -->
 
@@ -460,7 +518,16 @@
                                             </div>
                                             <div class="productDetail">
                                                 <div class="productName">
-                                                    <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="category">
                                                     <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
@@ -506,380 +573,425 @@
                                         </div>
                                     </div>
                                 </c:forEach>
-                        </div>
-                        <div id="StausLayHang" class="container tab-pane fade">
-                            <c:set var="statusLayHang" value="2"/>
-                            <c:set var="statusYeuCauHuy" value="5"/>
-                            <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusLayHang, statusYeuCauHuy)}">
-                                <div class="orderEmpty">
-                                    <img height="100px" width="90px" src="/img/iconorder.png">
-                                    <p>Danh sách đơn hàng trống</p>
-                                </div>
-                            </c:if>
-                            <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusLayHang, statusYeuCauHuy)}">
-                                <div class="fromOrder">
-                                    <div class="orderDetailProduct">
-                                        <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                        <div class="img">
-                                            <img  width="120px" height="140px" src="/image/${detail.product.image}" alt="">
-                                        </div>
-                                        <div class="productDetail">
-                                            <div class="productName">
-                                                <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
-                                            </div>
-                                            <div class="category">
-                                                <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
-                                            </div>
-                                            <div class="dateOrder">
-                                                <p>${order.bookingDate}</p>
-                                            </div>
-                                            <div class="priceDetail">
-                                                <div class="detail">
-                                                    <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
-                                                </div>
-                                                <div class="productPrice">
-                                                    <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
-                                                </div>
-                                            </div>
-                                        </div>
+                            </div>
+                            <div id="StausLayHang" class="container tab-pane fade">
+                                <c:set var="statusLayHang" value="2"/>
+                                <c:set var="statusYeuCauHuy" value="5"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusLayHang, statusYeuCauHuy)}">
+                                    <div class="orderEmpty">
+                                        <img height="100px" width="90px" src="/img/iconorder.png">
+                                        <p>Danh sách đơn hàng trống</p>
                                     </div>
-                                    <hr>
-                                    <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                    <div class="quantityTotalPrices">
-                                        <div class="quantity">
-                                            <p>${quantity} sản phẩm</p>
-                                        </div>
-                                        <div class="totalPrice">
-                                            <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="button">
-                                        <div class="statusOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 2}">
-                                                    <h3 style="color: #b98d3c; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #b98d3c" class="fa-solid fa-boxes-packing"></i></h3>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625" class="fa-solid fa-ban"></i></h3>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                        <div class="detailOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 2}">
-                                                    <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
-                                                    <div class="overlay" style="display:none;"></div>
-                                                    <div class="reasonCancel" style="display:none;">
-                                                        <div class="re">
-                                                            <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                            <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                            <form action="ChangeStatusOrderUser" method="post">
-                                                                <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                                <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                                <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                                <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                                <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                                <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
-                                                                <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                                <input type="hidden" name="action" value="CancelOrder2" />
-                                                                <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
-                                                            </form>
-                                                        </div>
+                                </c:if>
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusLayHang, statusYeuCauHuy)}">
+                                    <div class="fromOrder">
+                                        <div class="orderDetailProduct">
+                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
+                                            <div class="img">
+                                                <img  width="120px" height="140px" src="/image/${detail.product.image}" alt="">
+                                            </div>
+                                            <div class="productDetail">
+                                                <div class="productName">
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
+                                                </div>
+                                                <div class="category">
+                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+                                                </div>
+                                                <div class="dateOrder">
+                                                    <p>${order.bookingDate}</p>
+                                                </div>
+                                                <div class="priceDetail">
+                                                    <div class="detail">
+                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
                                                     </div>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <form action="ChangeStatusOrderUser" method="post">
-                                                        <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                        <input type="hidden" name="action" value="ReturnCancelOrder2" />
-                                                        <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
-                                                    </form>
-                                                </c:otherwise>
-                                            </c:choose>
+                                                    <div class="productPrice">
+                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
+                                        <div class="quantityTotalPrices">
+                                            <div class="quantity">
+                                                <p>${quantity} sản phẩm</p>
+                                            </div>
+                                            <div class="totalPrice">
+                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="button">
+                                            <div class="statusOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 2}">
+                                                        <h3 style="color: #b98d3c; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #b98d3c" class="fa-solid fa-boxes-packing"></i></h3>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625" class="fa-solid fa-ban"></i></h3>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div class="detailOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 2}">
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re">
+                                                                <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post">
+                                                                    <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
+                                                                    <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
+                                                                    <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
+                                                                    <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
+                                                                    <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
+                                                                    <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="CancelOrder2" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form action="ChangeStatusOrderUser" method="post">
+                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                            <input type="hidden" name="action" value="ReturnCancelOrder2" />
+                                                            <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
 
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                        <div id="StausGiaoHang" class="container tab-pane fade">
-                            <c:set var="statusGiaoHang" value="3"/>
-                            <c:set var="statusGiaoHangThanhCong" value="4"/>
-                            <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
-                                <div class="orderEmpty">
-                                    <img height="100px" width="90px" src="/img/iconorder.png">
-                                    <p>Danh sách đơn hàng trống</p>
-                                </div>
-                            </c:if>
-                            <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
-                                <div class="fromOrder">
-                                    <div class="orderDetailProduct">
-                                        <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                        <div class="img">
-                                            <img  width="120px" height="140px" src="/image/${detail.product.image}" alt="">
-                                        </div>
-                                        <div class="productDetail">
-                                            <div class="productName">
-                                                <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                </c:forEach>
+                            </div>
+                            <div id="StausGiaoHang" class="container tab-pane fade">
+                                <c:set var="statusGiaoHang" value="3"/>
+                                <c:set var="statusGiaoHangThanhCong" value="4"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
+                                    <div class="orderEmpty">
+                                        <img height="100px" width="90px" src="/img/iconorder.png">
+                                        <p>Danh sách đơn hàng trống</p>
+                                    </div>
+                                </c:if>
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
+                                    <div class="fromOrder">
+                                        <div class="orderDetailProduct">
+                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
+                                            <div class="img">
+                                                <img  width="120px" height="140px" src="/image/${detail.product.image}" alt="">
                                             </div>
-                                            <div class="category">
-                                                <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
-                                            </div>
-                                            <div class="dateOrder">
-                                                <p>${order.bookingDate}</p>
-                                            </div>
-                                            <div class="priceDetail">
-                                                <div class="detail">
-                                                    <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                            <div class="productDetail">
+                                                <div class="productName">
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
-                                                <div class="productPrice">
-                                                    <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                <div class="category">
+                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                    <div class="quantityTotalPrices">
-                                        <div class="quantity">
-                                            <p>${quantity} sản phẩm</p>
-                                        </div>
-                                        <div class="totalPrice">
-                                            <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="button">
-                                        <div class="statusOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 4}">
-                                                    <h3 style="color: #38bc10; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #38bc10" class="fa-solid fa-truck-ramp-box"></i></h3>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <h3 style="color: #1c67d7; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #1c67d7" class="fa-solid fa-truck-fast"></i> </h3>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                        <div class="detailOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 4}">
-                                                    <form action="ChangeStatusOrderUser" method="post">
-                                                        <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                        <input type="hidden" name="action" value="ReceiveOrder" />
-                                                        <button type="submit" class="badge bg-danger me-1" style="font-size: 22px; border: none; width: auto">Đã nhận được</button>
-                                                    </form>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button class="badge bg-secondary" style="font-size: 22px; border: none;">Đã nhận được</button>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                        <div id="StausDaGiao" class="container tab-pane fade">
-                            <c:set var="statusDaNhan" value="10"/>
-                            <c:set var="statusYeuCauTraHang" value="7"/>
-                            <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaNhan,statusYeuCauTraHang)}">
-                                <div class="orderEmpty">
-                                    <img height="100px" width="90px" src="/img/iconorder.png">
-                                    <p>Danh sách đơn hàng trống</p>
-                                </div>
-                            </c:if>
-                            <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusDaNhan,statusYeuCauTraHang)}">
-                                <div class="fromOrder">
-                                    <div class="orderDetailProduct">
-                                        <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                        <div class="img">
-                                            <img  width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
-                                        </div>
-                                        <div class="productDetail">
-                                            <div class="productName">
-                                                <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
-                                            </div>
-                                            <div class="category">
-                                                <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
-                                            </div>
-                                            <div class="dateOrder">
-                                                <p>${order.bookingDate}</p>
-                                            </div>
-                                            <div class="priceDetail">
-                                                <div class="detail">
-                                                    <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                                <div class="dateOrder">
+                                                    <p>${order.bookingDate}</p>
                                                 </div>
-                                                <div class="productPrice">
-                                                    <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                    <div class="quantityTotalPrices">
-                                        <div class="quantity">
-                                            <p>${quantity} sản phẩm</p>
-                                        </div>
-                                        <div class="totalPrice">
-                                            <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="button">
-                                        <div class="statusOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 10}">
-                                                    <h3 style="color: #c264ff; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c264ff" class="fa-solid fa-box-open"></i></h3>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625" class="fa-solid fa-truck-fast"></i> </h3>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                        <div class="detailOrder">
-                                            <c:choose>
-                                                <c:when test="${order.status.statusId == 10}">
-                                                    <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu trả hàng</button>
-                                                    <div class="overlay" style="display:none;"></div>
-                                                    <div class="reasonCancel" style="display:none;">
-                                                        <div class="re">
-                                                            <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                            <h4>Hãy chọn lý do bạn trả hàng ${order.orderId}</h4>
-                                                            <form action="ChangeStatusOrderUser" method="post">
-                                                                <input type="radio" id="reason1-${order.orderId}" name="reason" value="Sản phẩm không đúng so với mô tả hoặc hình ảnh trên trang web.">
-                                                                <label for="reason1-${order.orderId}">Sản phẩm không đúng so với mô tả hoặc hình ảnh trên trang web.</label><br>
-                                                                <input type="radio" id="reason2-${order.orderId}" name="reason" value="Sản phẩm bị hỏng hoặc bị hỏng trong quá trình vận chuyển.">
-                                                                <label for="reason2-${order.orderId}">Sản phẩm bị hỏng hoặc bị hỏng trong quá trình vận chuyển.</label><br>
-                                                                <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không hài lòng với sản phẩm sau khi nhận và muốn trả về vì không còn nhu cầu sử dụng nữa.">
-                                                                <label for="reason3-${order.orderId}">Không hài lòng với sản phẩm sau khi nhận và muốn trả về vì không còn nhu cầu sử dụng nữa.</label><br>
-                                                                <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                                <input type="hidden" name="action" value="ReturnOrder" />
-                                                                <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
-                                                            </form>
-                                                        </div>
+                                                <div class="priceDetail">
+                                                    <div class="detail">
+                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
                                                     </div>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <form action="ChangeStatusOrderUser" method="post">
-                                                        <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                        <input type="hidden" name="action" value="CancelReturnOrder" />
-                                                        <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
-                                                    </form>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                        <div id="StausDaHuy" class="container tab-pane fade">
-                            <c:set var="statusDaHuy" value="6"/>
-                            <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaHuy)}">
-                                <div class="orderEmpty">
-                                    <img height="100px" width="90px" src="/img/iconorder.png">
-                                    <p>Danh sách đơn hàng trống</p>
-                                </div>
-                            </c:if>
-                            <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusDaHuy)}">
-                                <div class="fromOrder">
-                                    <div class="orderDetailProduct">
-                                        <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                        <div class="img">
-                                            <img   width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
-                                        </div>
-                                        <div class="productDetail">
-                                            <div class="productName">
-                                                <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
-                                            </div>
-                                            <div class="category">
-                                                <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
-                                            </div>
-                                            <div class="dateOrder">
-                                                <p>${order.bookingDate}</p>
-                                            </div>
-                                            <div class="priceDetail">
-                                                <div class="detail">
-                                                    <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
-                                                </div>
-                                                <div class="productPrice">
-                                                    <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    <div class="productPrice">
+                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <hr>
-                                    <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                    <div class="quantityTotalPrices">
-                                        <div class="quantity">
-                                            <p>${quantity} sản phẩm</p>
-                                        </div>
-                                        <div class="totalPrice">
-                                            <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="button">
-                                        <div class="statusOrder">
-                                            <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} </h3>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                        <div id="StausDaHoan" class="container tab-pane fade">
-                            <c:set var="statusDaHoan" value="8"/>
-                            <c:set var="statusYeuCauTraHang" value="7"/>
-                            <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaHoan)}">
-                                <div class="orderEmpty">
-                                    <img height="100px" width="90px" src="/img/iconorder.png">
-                                    <p>Danh sách đơn hàng trống</p>
-                                </div>
-                            </c:if>
-                            <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusDaHoan)}">
-                                <div class="fromOrder">
-                                    <div class="orderDetailProduct">
-                                        <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                        <div class="img">
-                                            <img  width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
-                                        </div>
-                                        <div class="productDetail">
-                                            <div class="productName">
-                                                <h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3>
+                                        <hr>
+                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
+                                        <div class="quantityTotalPrices">
+                                            <div class="quantity">
+                                                <p>${quantity} sản phẩm</p>
                                             </div>
-                                            <div class="category">
-                                                <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+                                            <div class="totalPrice">
+                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
                                             </div>
-                                            <div class="dateOrder">
-                                                <p>${order.bookingDate}</p>
+                                        </div>
+                                        <hr>
+                                        <div class="button">
+                                            <div class="statusOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 4}">
+                                                        <h3 style="color: #38bc10; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #38bc10" class="fa-solid fa-truck-ramp-box"></i></h3>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <h3 style="color: #1c67d7; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #1c67d7" class="fa-solid fa-truck-fast"></i> </h3>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
-                                            <div class="priceDetail">
-                                                <div class="detail">
-                                                    <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                            <div class="detailOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 4}">
+                                                        <form action="ChangeStatusOrderUser" method="post">
+                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                            <input type="hidden" name="action" value="ReceiveOrder" />
+                                                            <button type="submit" class="badge bg-danger me-1" style="font-size: 22px; border: none; width: auto">Đã nhận được</button>
+                                                        </form>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <button class="badge bg-secondary" style="font-size: 22px; border: none;">Đã nhận được</button>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                            <div id="StausDaGiao" class="container tab-pane fade">
+                                <c:set var="statusDaNhan" value="10"/>
+                                <c:set var="statusYeuCauTraHang" value="7"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaNhan,statusYeuCauTraHang)}">
+                                    <div class="orderEmpty">
+                                        <img height="100px" width="90px" src="/img/iconorder.png">
+                                        <p>Danh sách đơn hàng trống</p>
+                                    </div>
+                                </c:if>
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusDaNhan,statusYeuCauTraHang)}">
+                                    <div class="fromOrder">
+                                        <div class="orderDetailProduct">
+                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
+                                            <div class="img">
+                                                <img  width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
+                                            </div>
+                                            <div class="productDetail">
+                                                <div class="productName">
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
                                                 </div>
-                                                <div class="productPrice">
-                                                    <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                <div class="category">
+                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+                                                </div>
+                                                <div class="dateOrder">
+                                                    <p>${order.bookingDate}</p>
+                                                </div>
+                                                <div class="priceDetail">
+                                                    <div class="detail">
+                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                                    </div>
+                                                    <div class="productPrice">
+                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <hr>
-                                    <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                    <div class="quantityTotalPrices">
-                                        <div class="quantity">
-                                            <p>${quantity} sản phẩm</p>
+                                        <hr>
+                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
+                                        <div class="quantityTotalPrices">
+                                            <div class="quantity">
+                                                <p>${quantity} sản phẩm</p>
+                                            </div>
+                                            <div class="totalPrice">
+                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
+                                            </div>
                                         </div>
-                                        <div class="totalPrice">
-                                            <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
+                                        <hr>
+                                        <div class="button">
+                                            <div class="statusOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 10}">
+                                                        <h3 style="color: #c264ff; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c264ff" class="fa-solid fa-box-open"></i></h3>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625" class="fa-solid fa-truck-fast"></i> </h3>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div class="detailOrder">
+                                                <c:choose>
+                                                    <c:when test="${order.status.statusId == 10}">
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu trả hàng</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re">
+                                                                <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Hãy chọn lý do bạn trả hàng ${order.orderId}</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post">
+                                                                    <input type="radio" id="reason1-${order.orderId}" name="reason" value="Sản phẩm không đúng so với mô tả hoặc hình ảnh trên trang web.">
+                                                                    <label for="reason1-${order.orderId}">Sản phẩm không đúng so với mô tả hoặc hình ảnh trên trang web.</label><br>
+                                                                    <input type="radio" id="reason2-${order.orderId}" name="reason" value="Sản phẩm bị hỏng hoặc bị hỏng trong quá trình vận chuyển.">
+                                                                    <label for="reason2-${order.orderId}">Sản phẩm bị hỏng hoặc bị hỏng trong quá trình vận chuyển.</label><br>
+                                                                    <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không hài lòng với sản phẩm sau khi nhận và muốn trả về vì không còn nhu cầu sử dụng nữa.">
+                                                                    <label for="reason3-${order.orderId}">Không hài lòng với sản phẩm sau khi nhận và muốn trả về vì không còn nhu cầu sử dụng nữa.</label><br>
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="ReturnOrder" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form action="ChangeStatusOrderUser" method="post">
+                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                            <input type="hidden" name="action" value="CancelReturnOrder" />
+                                                            <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
                                         </div>
                                     </div>
-                                    <hr>
-                                    <div class="button">
-                                        <div class="statusOrder">
-                                            <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625;" class="fa-solid fa-arrow-right-arrow-left"></i></h3>
+                                </c:forEach>
+                            </div>
+                            <div id="StausDaHuy" class="container tab-pane fade">
+                                <c:set var="statusDaHuy" value="6"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaHuy)}">
+                                    <div class="orderEmpty">
+                                        <img height="100px" width="90px" src="/img/iconorder.png">
+                                        <p>Danh sách đơn hàng trống</p>
+                                    </div>
+                                </c:if>
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusDaHuy)}">
+                                    <div class="fromOrder">
+                                        <div class="orderDetailProduct">
+                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
+                                            <div class="img">
+                                                <img   width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
+                                            </div>
+                                            <div class="productDetail">
+                                                <div class="productName">
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
+                                                </div>
+                                                <div class="category">
+                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+                                                </div>
+                                                <div class="dateOrder">
+                                                    <p>${order.bookingDate}</p>
+                                                </div>
+                                                <div class="priceDetail">
+                                                    <div class="detail">
+                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                                    </div>
+                                                    <div class="productPrice">
+                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
+                                        <div class="quantityTotalPrices">
+                                            <div class="quantity">
+                                                <p>${quantity} sản phẩm</p>
+                                            </div>
+                                            <div class="totalPrice">
+                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="button">
+                                            <div class="statusOrder">
+                                                <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} </h3>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </c:forEach>
+                                </c:forEach>
+                            </div>
+                            <div id="StausDaHoan" class="container tab-pane fade">
+                                <c:set var="statusDaHoan" value="8"/>
+                                <c:set var="statusYeuCauTraHang" value="7"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusDaHoan)}">
+                                    <div class="orderEmpty">
+                                        <img height="100px" width="90px" src="/img/iconorder.png">
+                                        <p>Danh sách đơn hàng trống</p>
+                                    </div>
+                                </c:if>
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusDaHoan)}">
+                                    <div class="fromOrder">
+                                        <div class="orderDetailProduct">
+                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
+                                            <div class="img">
+                                                <img  width="120px" height="140px"  src="/image/${detail.product.image}" alt="">
+                                            </div>
+                                            <div class="productDetail">
+                                                <div class="productName">
+                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                    </c:if>
+                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                                                    </c:if>
+                                                </div>
+                                                <div class="category">
+                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
+                                                </div>
+                                                <div class="dateOrder">
+                                                    <p>${order.bookingDate}</p>
+                                                </div>
+                                                <div class="priceDetail">
+                                                    <div class="detail">
+                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
+                                                    </div>
+                                                    <div class="productPrice">
+                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
+                                        <div class="quantityTotalPrices">
+                                            <div class="quantity">
+                                                <p>${quantity} sản phẩm</p>
+                                            </div>
+                                            <div class="totalPrice">
+                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="button">
+                                            <div class="statusOrder">
+                                                <h3 style="color: #c31625; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c31625;" class="fa-solid fa-arrow-right-arrow-left"></i></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
                         </div>
                     </div>
                 </div>

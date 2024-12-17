@@ -101,14 +101,19 @@ public class CheckoutController extends HttpServlet {
         PaymentDAO paymentDAO = new PaymentDAO();
         Payment payment = paymentDAO.selectById(paymentId);
         StatusOrder statusOrder = new StatusOrder(11);
+////        StatusOrder statusOrderPayment = new StatusOrder(9);
+//        StatusOrder statusOrder = (paymentId == 1) ? new StatusOrder(9) : new StatusOrder(1);
+        StatusSignature chuaXacMinh = new StatusSignature(1);
+        if (paymentId == 1){
 
+        }
         // Sử dụng LocalDateTime và DateTimeFormatter để có timestamp với giây
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDate = now.format(formatter);
         Timestamp bookingTimestamp = Timestamp.valueOf(formattedDate);
 
-        Order order = new Order(orderDAO.creatId() + 1, user, allTotal, name, phone, fullAddress, payment, bookingTimestamp, note, shippingCost, statusOrder);
+        Order order = new Order(orderDAO.creatId() + 1, user, allTotal, name, phone, fullAddress, payment, bookingTimestamp, note, shippingCost, statusOrder, chuaXacMinh);
         order.setNameConsignee(name);
         order.setUser(user);
         order.setPhone(phone);
@@ -195,31 +200,14 @@ public class CheckoutController extends HttpServlet {
                     System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
 
                     OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-                    StatusOrder statusOrder1 = new StatusOrder(11);
-                    OrderSignature orderSignature = new OrderSignature(order, hash, statusOrder1);
+
+                    OrderSignature orderSignature = new OrderSignature(order, hash);
                     int addHash = orderSignatureDAO.insert(orderSignature);
 
                     if (addHash > 0) {
-                        String emailSubject = "Mã xác thực của đơn hàng MDH" +orderInDatabase.getOrderId()+ " bạn cần ký tên";
-                        String emailBody = "<!DOCTYPE html>" +
-                                "<html>" +
-                                "<head>" +
-                                "<meta charset='UTF-8'>" +
-                                "<title>Xác thực chữ ký</title>" +
-                                "</head>" +
-                                "<body>" +
-                                "<h1>Xin chào " + user.getName() + "</h1>" +
-                                "<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
-                                "<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
-                                "<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
-                                "<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
-                                "<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
-                                "<p>Trân trọng,</p>" +
-                                "<p>Cửa hàng của chúng tôi</p>" +
-                                "</body>" +
-                                "</html>";
+                        //gửi mail
+                        Email.sendEmailHashOrderToUser(user.getName(), hash, order);
 
-                        Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
                     }
 
 
@@ -230,9 +218,7 @@ public class CheckoutController extends HttpServlet {
 
                 // Xóa giỏ hàng sau khi đặt hàng thành công
                 cart.clearCart();
-                if (paymentId == 1) {
-                    request.getRequestDispatcher("/WEB-INF/book/Vnpay.jsp").forward(request, response);
-                } else {
+
                     session.removeAttribute("appliedCouponCode");
                     session.removeAttribute("discountValue");
                     session.removeAttribute("discountType");
@@ -241,7 +227,7 @@ public class CheckoutController extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
                     return;
                 }
-            }
+
         }
         // Trả về kết quả
 

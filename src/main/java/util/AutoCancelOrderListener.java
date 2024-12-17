@@ -20,7 +20,13 @@ public  class AutoCancelOrderListener implements ServletContextListener {
         scheduler.scheduleAtFixedRate(() -> {
             OrderDAO orderDAO = new OrderDAO();
             int rowsUpdated = orderDAO.cancelExpiredOrders();
-            System.out.println("So don hang da bi huy tu dong: " + rowsUpdated);
+            System.out.println("So don hang da bi huy tu dong do het han xac minh: " + rowsUpdated);
+
+
+            // Hủy các đơn hàng có status_id = 9 và đã quá 24h
+            int rowsUpdatedForStatus9 = orderDAO.cancelExpiredOrderPayment();
+            System.out.println("So don hang da bi huy tu dong do het han thanh toan: " + rowsUpdatedForStatus9);
+
 //        }, 0, 1, TimeUnit.MINUTES); // Lặp mỗi 1 phút
         }, 0, 1, TimeUnit.HOURS); // Lặp mỗi 1 giờ
     }

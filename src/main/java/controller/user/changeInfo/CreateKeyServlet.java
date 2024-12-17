@@ -47,10 +47,12 @@ public class CreateKeyServlet extends HttpServlet {
 
         if (isCreated) {
             this.updatekeyy(keyUser);
-            request.setAttribute("message", "Khóa đã được tạo thành công!");
+            request.setAttribute("message", "Khóa mới đã được tạo thành công!");
+            request.setAttribute("type", "success");
         } else {
-            request.setAttribute("errorBean", "Tạo khóa thất bại. Vui lòng thử lại!");
+            request.setAttribute("errorBean", "Tạo mới khóa thất bại. Vui lòng thử lại!");
             request.setAttribute("message", "Tạo khóa thất bại. Vui lòng thử lại!");
+            request.setAttribute("type", "error");
         }
 
         // Forward response back to the JSP

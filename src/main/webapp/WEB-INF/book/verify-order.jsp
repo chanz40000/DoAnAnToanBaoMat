@@ -236,8 +236,14 @@
                         <c:if test="${order.status.statusId == 11}">
                             <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #f6b422" class="fa-solid fa-clock"></i></div>
                         </c:if>
-                        <c:if test="${order.status.statusId == 12}">
-                            <div style="color: #077800; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
+                        <c:if test="${order.statusSignature.statusSignatureId == 1}">
+                            <div style="color: #c30404; font-weight: bold"><span>Xác minh chữ ký:</span> ${order.statusSignature.statusSignatureName}</div>
+                        </c:if>
+                        <c:if test="${order.statusSignature.statusSignatureId == 2}">
+                            <div style="color: #c30404; font-weight: bold"><span>Xác minh chữ ký:</span> ${order.statusSignature.statusSignatureName}</div>
+                        </c:if>
+                        <c:if test="${order.statusSignature.statusSignatureId == 3}">
+                            <div style="color: #077800; font-weight: bold"><span>Trạng thái:</span> ${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
                         </c:if>
                     </div>
                     <hr>
@@ -289,11 +295,15 @@
                         <li>Lấy chữ ký và nhập vào ô dưới đây (Hướng dẫn xài tool)</li>
                     </ul>
                     <div class="signature">
-                        <form id="verifyForm">
-                            <div id="verifyResult" style="color: red; font-weight: bold;"></div>
+                        <form id="verifyForm" action="/VerifySignature" method="GET">
+                            <c:if test="${not empty Error}">
+                                <div class="error-message" style="color: red; font-weight: bold;">
+                                        ${Error}
+                                </div>
+                            </c:if>
                             <textarea id="signatureInput" name="signature" rows="4" cols="50" placeholder="Nhập chữ ký của bạn ở đây..."></textarea>
                             <br>
-                            <button id="verifyButton" type="button" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
+                            <button id="verifyButton" type="submit" class="btn btn-primary" style="width: 100%; font-size: 18px; font-weight: bold; background-color: #a71d2a; border: none;">
                                 Xác nhận đơn hàng
                             </button>
                         </form>
@@ -351,34 +361,7 @@
     // Enable Dark Reader when the page loads
 
 </script>
-<script>
-    document.getElementById("verifyButton").addEventListener("click", function () {
-        const signature = document.getElementById("signatureInput").value;
 
-        if (!signature.trim()) {
-            document.getElementById("verifyResult").textContent = "Vui lòng nhập chữ ký!";
-            return;
-        }
-
-        fetch("VerifySignature?signature=" + encodeURIComponent(signature))
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    // Chuyển hướng trang nếu xác thực thành công
-                    window.location.href = data.redirectUrl;
-                } else {
-                    // Hiển thị thông báo lỗi
-                    document.getElementById("verifyResult").style.color = "red";
-                    document.getElementById("verifyResult").textContent = data.message;
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("verifyResult").textContent = "Đã xảy ra lỗi khi gửi yêu cầu.";
-            });
-    });
-
-</script>
 
 </body>
 

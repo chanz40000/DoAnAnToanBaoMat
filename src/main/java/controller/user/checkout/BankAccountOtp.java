@@ -1,6 +1,10 @@
 package controller.user.checkout;
 
+import database.OrderDAO;
 import model.ErrorBean;
+import model.Order;
+import model.StatusOrder;
+import model.User;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -27,7 +31,8 @@ public class BankAccountOtp extends HttpServlet {
         HttpSession session = request.getSession();
         int value = Integer.parseInt(request.getParameter("otp"));
         int otp = (int) session.getAttribute("otpbank");
-
+        User user = (User) session.getAttribute("userC");
+        Order order = (Order) session.getAttribute("order");
 
         if (value == otp) {
 
@@ -36,7 +41,6 @@ public class BankAccountOtp extends HttpServlet {
             String url = request.getContextPath() + "/WEB-INF/book/thankyou.jsp";
             RequestDispatcher dispatcher = request.getRequestDispatcher(url);
             dispatcher.forward(request, response);
-
         } else {
             request.setAttribute("message", "Sai mã OTP");
             ErrorBean eb = new ErrorBean();

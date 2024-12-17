@@ -52,10 +52,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
 
 
                 orders.add(order);
@@ -90,10 +92,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int statusId = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
                 orders.add(order);
             }
         }catch (Exception e){
@@ -103,7 +107,7 @@ public class OrderDAO extends AbsDAO<Order>{
     }
 
     /**
-     * Cập nhật trạng thái các đơn hàng đã quá 24 giờ và chưa xác nhận chữ ký (status_id = 11) thành "hủy đơn" (status_id = 6)
+     * Cập nhật trạng thái các đơn hàng đã quá 24 giờ và chưa xác nhận chữ ký (status_id = 9) thành "hủy đơn" (status_id = 6)
      */
     public int cancelExpiredOrders() {
         int rowsUpdated = 0;
@@ -119,7 +123,28 @@ public class OrderDAO extends AbsDAO<Order>{
             JDBCUtil.closeConnection(con);
 
 
-            System.out.println("Da cap nhat " + rowsUpdated + " don hang sang trang thai 'huy don'.");
+            System.out.println("Da cap nhat " + rowsUpdated + " don hang sang trang thai 'huy don'. do het han xac minh");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowsUpdated;
+    }
+
+    public int cancelExpiredOrderPayment() {
+        int rowsUpdated = 0;
+        try {
+            Connection con = JDBCUtil.getConnection();
+            String sql = "UPDATE orders " +
+                    "SET status_id = 6 " +
+                    "WHERE status_id = 9 " +
+                    "AND TIMESTAMPDIFF(HOUR, booking_date, NOW()) >= 24";
+//                    "AND TIMESTAMPDIFF(MINUTE, booking_date, NOW()) >= 1";
+            PreparedStatement st = con.prepareStatement(sql);
+            rowsUpdated = st.executeUpdate();
+            JDBCUtil.closeConnection(con);
+
+
+            System.out.println("Da cap nhat " + rowsUpdated + " don hang sang trang thai 'huy don'. do het han thanh toan");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -161,13 +186,31 @@ public class OrderDAO extends AbsDAO<Order>{
             Order order = orderDAO.selectById(orderId);
             this.setPreValue(this.gson.toJson(order));
             order.setStatus(status);
-            this.setValue("Don hang co ma: "+order.getOrderId()+" da duoc thay doi trang thanh: " + order.getStatus().getStatusName());
+            this.setValue("Don hang co ma: "+order.getOrderId()+" da duoc thay doi trang thai don hang thanh: " + status.getStatusName());
             int x = super.update(order);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public void updateStatusSignatureOrder(int orderId, StatusSignature status){
+        int result = 0;
+        try (Connection con = JDBCUtil.getConnection();
+             PreparedStatement st = con.prepareStatement("UPDATE orders SET signature_status_id = ? WHERE order_id = ?")) {
 
+            st.setInt(1, status.getStatusSignatureId());
+            st.setInt(2, orderId);
+            result = st.executeUpdate();
+
+            OrderDAO orderDAO = new OrderDAO();
+            Order order = orderDAO.selectById(orderId);
+            this.setPreValue(this.gson.toJson(order));
+            order.setStatusSignature(status);
+            this.setValue("Don hang co ma: "+order.getOrderId()+" da duoc thay doi trang thai xac minh thanh: " + status.getStatusSignatureName());
+            int x = super.update(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public Order selectById(int id) {
         Order result = null;
@@ -193,10 +236,13 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                result= new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                result=  new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
+
 
 
             }
@@ -246,10 +292,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                Order order = new Order(idImport, u, totalPrice, userConsignee, phone, address, pay, time, note, shippingFee, statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
                 orders.add(order);
             }
         } catch (Exception e) {
@@ -287,11 +335,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
 
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-
-                Order order = new Order(idImport, u, totalPrice, userConsignee, phone, address, pay, time, note, shippingFee, statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
                 orders.add(order);
             }
         } catch (Exception e) {
@@ -330,10 +379,54 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
+                orders.add(order);
+            }
+
+            JDBCUtil.closeConnection(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+
+    }
+    public List<Order> selectByUserIdAndStatusSignatureId(int userId, int statusSignatureId) {
+        List<Order> orders = new ArrayList<>();
+
+        try {
+
+            Connection con = JDBCUtil.getConnection();
+
+            String sql = "SELECT * FROM orders WHERE user_id = ? AND signature_status_id = ?";
+
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, userId);
+            st.setInt(2, statusSignatureId);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                int idImport = rs.getInt("order_id");
+                int idUser = rs.getInt("user_id");
+                double totalPrice = rs.getDouble("total_price");
+                String userConsignee = rs.getString("nameConsignee");
+                String phone = rs.getString("phone");
+                String address = rs.getString("address");
+                int idPayment = rs.getInt("payment_id");
+                Timestamp time = rs.getTimestamp("booking_date");
+                String note = rs.getString("note");
+                double shippingFee = rs.getDouble("shipping_fee");
+                int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
+                User u = new UserDAO().selectById(idUser);
+                Payment pay = new PaymentDAO().selectById(idPayment);
+                StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
                 orders.add(order);
             }
 
@@ -382,10 +475,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 String note = rs.getString("note");
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
-                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
                 orders.add(order);
             }
 
@@ -396,15 +491,67 @@ public class OrderDAO extends AbsDAO<Order>{
 
         return orders;
     }
+    public List<Order> selectByUserIdAndStatusSignatureIds(int userId, int... statusSignatureIds) {
+        List<Order> orders = new ArrayList<>();
 
+        try {
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu truy vấn SQL động với số lượng điều kiện status_id tùy biến
+            StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM orders WHERE user_id = ? AND signature_status_id IN (");
+            for (int i = 0; i < statusSignatureIds.length; i++) {
+                sqlBuilder.append("?");
+                if (i < statusSignatureIds.length - 1) {
+                    sqlBuilder.append(", ");
+                }
+            }
+            sqlBuilder.append(")");
+
+            PreparedStatement st = con.prepareStatement(sqlBuilder.toString());
+            st.setInt(1, userId);
+
+            // Đặt giá trị cho các tham số status_id
+            for (int i = 0; i < statusSignatureIds.length; i++) {
+                st.setInt(i + 2, statusSignatureIds[i]);
+            }
+
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                int idImport = rs.getInt("order_id");
+                int idUser = rs.getInt("user_id");
+                double totalPrice = rs.getDouble("total_price");
+                String userConsignee = rs.getString("nameConsignee");
+                String phone = rs.getString("phone");
+                String address = rs.getString("address");
+                int idPayment = rs.getInt("payment_id");
+                Timestamp time = rs.getTimestamp("booking_date");
+                String note = rs.getString("note");
+                double shippingFee = rs.getDouble("shipping_fee");
+                int status = rs.getInt("status_id");
+                int statusSignature = rs.getInt("signature_status_id");
+                User u = new UserDAO().selectById(idUser);
+                Payment pay = new PaymentDAO().selectById(idPayment);
+                StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
+                StatusSignature statusSignature1 = new StatusSignatureDAO().selectById(statusSignature);
+                Order order = new Order(idImport,u,totalPrice,userConsignee,phone,address,pay,time,note,shippingFee,statusOrder, statusSignature1);
+                orders.add(order);
+            }
+
+            JDBCUtil.closeConnection(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
     @Override
     public int insert(Order order) {
         int result = 0;
         try {
             Connection con = JDBCUtil.getConnection();
 
-            String sql = "INSERT INTO orders(order_id, user_id,total_price,nameConsignee,phone,address,payment_id,booking_date,note,shipping_fee,status_id)"
-                    + "VALUES(?, ?, ?, ?,?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO orders(order_id, user_id,total_price,nameConsignee,phone,address,payment_id,booking_date,note,shipping_fee,status_id, signature_status_id)"
+                    + "VALUES(?, ?, ?, ?,?,?,?,?,?,?,?,?)";
 
             PreparedStatement rs = con.prepareStatement(sql);
 
@@ -419,6 +566,7 @@ public class OrderDAO extends AbsDAO<Order>{
             rs.setString(9, order.getNote());
             rs.setDouble(10, order.getShippingFee());
             rs.setInt(11,order.getStatus().getStatusId());
+            rs.setInt(12,order.getStatusSignature().getStatusSignatureId());
 
 
 
@@ -498,6 +646,7 @@ public class OrderDAO extends AbsDAO<Order>{
                         ", note=? " +
                         ", shipping_fee=? " +
                         ", status_id=? " +
+                        ",signature_status_id=? " +
                         "WHERE order_id = ?";
 
                 PreparedStatement rs = con.prepareStatement(sql);
@@ -513,6 +662,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 rs.setString(9, order.getNote());
                 rs.setDouble(10, order.getShippingFee());
                 rs.setInt(11,order.getStatus().getStatusId());
+                rs.setInt(12,order.getStatusSignature().getStatusSignatureId());
 
 
 

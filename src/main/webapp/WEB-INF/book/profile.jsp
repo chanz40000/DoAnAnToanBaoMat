@@ -110,6 +110,8 @@
 		text-align: left;
 		border: 1px solid #ddd;
 	}
+
+
 </style>
 
 </head>
@@ -211,32 +213,35 @@
 									</div>
 									<div class="card-body">
 										<div style="text-align: center;color: red" class="red" id="baoLoi1">${message} </div>
-
+										<div id="notification"></div>
 										<table>
 											<thead>
 											<tr>
 												<th>Tên khóa</th>
 												<th>Ngày tạo</th>
 												<th>Ngày hết hạn</th>
+												<th>Trạng thái</th>
 												<th>Hành động</th>
 											</tr>
 											</thead>
 											<tbody>
 											<c:set var="id" value="${sessionScope.userC.userId}"/>
-											<c:set var="counter" value="1" scope="page" /> <!-- Khởi tạo biến đếm -->
-                                            <c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
-											<tr>
-												<td>Khóa ${counter}</td>
-												<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
-												<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
-												<td>
-													<button class="btn btn-warning" data-toggle="modal" data-target="#keyModal">Lộ khóa</button>
-													<button class="btn btn-danger">Xóa khóa</button>
-													<button class="btn btn-success">Sử dụng</button>
-												</td>
-											</tr>
+											<c:set var="counter" value="1" scope="page"/> <!-- Khởi tạo biến đếm -->
+											<c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
+												<tr>
+													<td>Khóa ${counter}</td>
+													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
+													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
+													<td>${key.getStatus()}</td> <!-- Hiển thị trạng thái -->
+													<td>
+														<button
+																class="btn ${key.getStatus() == 'ON' ? 'btn-warning' : 'btn-secondary'} " data-toggle="modal" data-target="#keyModal"
+															${key.getStatus() == 'ON' ? '' : 'disabled'}>
+															Lộ khóa
+														</button>
+													</td>
+												</tr>
 												<c:set var="counter" value="${counter + 1}" /> <!-- Tăng biến đếm -->
-											<!-- Thêm nhiều khóa khác -->
 											</c:forEach>
 											</tbody>
 										</table>
@@ -297,6 +302,23 @@
 			<circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg>
 	</div>
 </div>
+<script>
+	// Lấy dữ liệu từ Servlet gửi qua
+	const message = "<%= request.getAttribute("message") != null ? request.getAttribute("message") : "" %>";
+	const type = "<%= request.getAttribute("type") != null ? request.getAttribute("type") : "" %>";
+
+	if (message) {
+		const notification = document.getElementById('notification');
+		notification.className = type; // success hoặc error
+		notification.innerHTML = message;
+		notification.style.display = 'block';
+
+		// Ẩn thông báo sau 3 giây
+		setTimeout(() => {
+			notification.style.display = 'none';
+		}, 3000);
+	}
+</script>
 <script>
 	// Handle the file load event
 	document.getElementById('loadFileButton').addEventListener('click', function() {
