@@ -835,6 +835,7 @@ public class OrderDAO extends AbsDAO<Order>{
     }
     public static void main(String[] args) {
         OrderDAO orderDAO = new OrderDAO();
+        orderDAO.updateStatusOrder(3,new StatusOrder(13));
         double[]rs=orderDAO.revenueForWeek(Date.valueOf(LocalDateTime.now().toLocalDate()));
         for (int i=0; i<5; i++){
             System.out.println(rs[i]);

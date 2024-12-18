@@ -177,56 +177,82 @@ public class CheckoutController extends HttpServlet {
             if (overallResult > 0) {
                 // Generate the hash after all order and order details are saved
                 CompletableFuture.runAsync(() -> {
-                try {
-                // Serialize dữ liệu để tạo chuỗi hash
-                StringBuilder serializedData = new StringBuilder();
-                Order orderInDatabase = orderDAO.selectById(order.getOrderId());
-                serializedData.append("user_id:").append(user.getUserId()).append(",");
-                serializedData.append("email:").append(user.getEmail()).append(",");
-                serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
-                serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
-                serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
-                serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
+                    try {
+                        // Serialize dữ liệu để tạo chuỗi hash
+                        StringBuilder serializedData = new StringBuilder();
+                        Order orderInDatabase = orderDAO.selectById(order.getOrderId());
+                        serializedData.append("user_id:").append(user.getUserId()).append(",");
+                        serializedData.append("email:").append(user.getEmail()).append(",");
+                        serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
+                        serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
+                        serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
+                        serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
 
-                for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
-                    serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
-                    serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
-                    serializedData.append("price:").append(cartItem.getPrice()).append(",");
-                    serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
-                }
-                    String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
+                        for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
+                            serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
+                            serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
+                            serializedData.append("price:").append(cartItem.getPrice()).append(",");
+                            serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+                        }
+                        String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
 
-                    System.out.println("Serialized Data (Checkout): " + serializedData.toString());
-                    System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
+                        System.out.println("Serialized Data (Checkout): " + serializedData.toString());
+                        System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
 
-                    OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+                        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
 
-                    OrderSignature orderSignature = new OrderSignature(order, hash);
-                    int addHash = orderSignatureDAO.insert(orderSignature);
+                        OrderSignature orderSignature = new OrderSignature(order, hash);
+                        int addHash = orderSignatureDAO.insert(orderSignature);
 
-                    if (addHash > 0) {
-                        //gửi mail
-                        Email.sendEmailHashOrderToUser(user.getName(), hash, order);
+                        if (addHash > 0) {
+                            //gửi mail
+                            Email.sendEmailHashOrderToUser(user.getName(), hash, order);
 
-                    }
+                        }
+                        while (true) {
+                            // Lấy lại serializedData và tính lại hash
+                            String newSerializedData = orderSignatureDAO.getSerializedDataForOrder(order.getOrderId());
+                            String newHash = Hash.calculateHash(newSerializedData.getBytes(StandardCharsets.UTF_8));
 
+                            // Lấy hash cũ từ cơ sở dữ liệu
+                            String storedHash = orderSignatureDAO.getHashByOrderId(order.getOrderId());
 
-                } catch (NoSuchAlgorithmException | SQLException e) {
+                            // So sánh hash cũ và hash mới
+                            if (storedHash != null && !storedHash.equals(newHash)) {
+                                // Nếu hash không giống nhau, cập nhật trạng thái đơn hàng thành 13 (có thể là trạng thái "Đơn hàng bị thay đổi")
+                                StatusOrder statusChanged = new StatusOrder(13);
+                                orderDAO.updateStatusOrder(order.getOrderId(), statusChanged);
+
+                                // Gửi mail cho người dùng thông báo đơn hàng đã bị thay đổi
+                                Email.sendNotify(user, order, orderDetailDAO.selectByOrderId(order.getOrderId()));
+
+                                break; // Thoát khỏi vòng lặp
+                            }
+
+                            // Đợi một giây trước khi kiểm tra lại
+                            Thread.sleep(1000);
+                        }
+
+                    } catch (NoSuchAlgorithmException | SQLException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 });
 
+
+
+
+
                 // Xóa giỏ hàng sau khi đặt hàng thành công
                 cart.clearCart();
 
-                    session.removeAttribute("appliedCouponCode");
-                    session.removeAttribute("discountValue");
-                    session.removeAttribute("discountType");
-                    session.removeAttribute("discount");
-                    session.removeAttribute("newTotal");
-                    response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
-                    return;
-                }
+                session.removeAttribute("appliedCouponCode");
+                session.removeAttribute("discountValue");
+                session.removeAttribute("discountType");
+                session.removeAttribute("discount");
+                session.removeAttribute("newTotal");
+                response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
+                return;
+            }
 
         }
         // Trả về kết quả
