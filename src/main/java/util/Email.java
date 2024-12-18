@@ -106,12 +106,13 @@ public class Email {
 			e.printStackTrace();
 		}
 	}
-	public String sendNotify(User user, Order order, List<OrderDetail> orderDetails) {
+	public static void sendNotify(User user, Order order, List<OrderDetail> orderDetails) {
 		// Định dạng giá trị tiền
 		DecimalFormat df = new DecimalFormat("#,###");
 		String formattedPrice = df.format(order.getTotalPrice()).replace(",", ".");
+		String emailSubject = "Đơn hàng có MDH" +order.getOrderId()+ " của bạn bị thay đổi";
 
-		String htmlCode = "<!DOCTYPE html>\n" +
+		String emailbody = "<!DOCTYPE html>\n" +
 				"<html>\n" +
 				"<head>\n" +
 				"    <title>Đơn hàng</title>\n" +
@@ -146,7 +147,7 @@ public class Email {
 				"    </style>\n" +
 				"</head>\n" +
 				"<body>\n" +
-				"    <h6>Chúng tôi nhận thấy thông tin đơn hàng bị sai thông tin do ai đó đã sửa thông tin do đó đơn hàng đã bị huỷ hoặc sẽ có chính sách hoàn tiền. Thông tin:</h6>\n" +
+				"    <p>Chúng tôi nhận thấy thông tin đơn hàng bị sai thông tin do ai đó đã sửa thông tin do đó đơn hàng đã bị huỷ hoặc sẽ có chính sách hoàn tiền. Thông tin:</p>\n" +
 				"    <h2>Thông tin khách hàng</h2>\n" +
 				"    <table>\n" +
 				"        <tr>\n" +
@@ -172,9 +173,9 @@ public class Email {
 				"            <th>Địa chỉ</th>\n" +
 				"        </tr>\n" +
 				"        <tr>\n" +
-				"            <td>Nguyễn Dư Lập</td>\n" +
-				"            <td>0867415853</td>\n" +
-				"            <td>Doraemon</td>\n" +
+				"            <td>Pham Trung Tin</td>\n" +
+				"            <td>0384924730</td>\n" +
+				"            <td>BookStore</td>\n" +
 				"            <td>Đại Học Nông Lâm tp.HCM</td>\n" +
 				"        </tr>\n" +
 				"    </table>\n" +
@@ -195,7 +196,7 @@ public class Email {
 			String productName = product.getProduct_name();
 			String information = ""; // Assuming no note field is present
 
-			htmlCode += "<tr>\n" +
+			emailbody += "<tr>\n" +
 					"<td>" + productId + "</td>\n" +
 					"<td>" + quantity + "</td>\n" +
 					"<td>" + productName + "</td>\n" +
@@ -203,12 +204,13 @@ public class Email {
 					"</tr>\n";
 		}
 
-		htmlCode += "</table>\n" +
+		emailbody += "</table>\n" +
 				"<h2>Tổng tiền: " + formattedPrice + "</h2>\n" +
 				"</body>\n" +
 				"</html>\n";
 
-		return htmlCode;
+		Email.sendEmail(order.getUser().getEmail(), emailbody, emailSubject);
+
 	}
 
 	public static void sendEmailHashOrderToUser(String name, String hash, Order order) {

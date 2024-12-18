@@ -409,9 +409,9 @@ public class UserDAO extends AbsDAO<User> {
             int failedLoginCount = getFailedLogin(username);
             // chỉ được đăng nhập nếu tài khoản của bị khóa khi đăng nhập sau lần thứ 5
             if (failedLoginCount < 5) {
-            resetFailedLoginAttempts(username);  // Đặt lại số lần đăng nhập sai
-            this.setValue("Tai khoan " + username + " da dang nhap thanh cong");
-            super.update(result);
+                resetFailedLoginAttempts(username);  // Đặt lại số lần đăng nhập sai
+                this.setValue("Tai khoan " + username + " da dang nhap thanh cong");
+                super.update(result);
             }
         }
 
@@ -729,4 +729,3 @@ public class UserDAO extends AbsDAO<User> {
 
     }
 }
-
