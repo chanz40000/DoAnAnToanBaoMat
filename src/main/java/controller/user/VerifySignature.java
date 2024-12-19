@@ -44,8 +44,22 @@ public class VerifySignature extends HttpServlet {
             dispatcher.forward(request, response);
             return;
         }
+        // Kiểm tra trạng thái đơn hàng
+        if (order.getStatus().getStatusId() != 11) {
+            String errorMessage = "Trạng thái đơn hàng không hợp lệ để xác thực!";
+            request.setAttribute("Error", errorMessage);
+            eb.setError(errorMessage);
+            request.setAttribute("errorBean", eb);
+
+            // Forward lại trang verify-order.jsp cùng thông báo lỗi
+            String url = "/WEB-INF/book/verify-order.jsp";
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
+            return;
+        }
 
         try {
+
 
 
             KeyUserDAO keyUserDAO = new KeyUserDAO();
@@ -56,8 +70,7 @@ public class VerifySignature extends HttpServlet {
             List<OrderDetail> orderDetails = orderDetailDAO.selectByOrderId(order.getOrderId());
             OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
             OrderSignature orderSignature = orderSignatureDAO.selectByOrderId(order.getOrderId());
-
-
+//
             // Serialize dữ liệu để tạo chuỗi hash
             StringBuilder serializedData = new StringBuilder();
             serializedData.append("user_id:").append(user.getUserId()).append(",");
@@ -100,6 +113,7 @@ public class VerifySignature extends HttpServlet {
             // Cập nhật trạng thái đơn hàng
             OrderDAO orderDAO = new OrderDAO();
             StatusSignature statusSignature = new StatusSignature(3);
+            boolean isVerify = true;
 
             if (order.getPayment().getPaymentId() == 1){
                 StatusOrder statusOrder = new StatusOrder(9);
@@ -107,6 +121,7 @@ public class VerifySignature extends HttpServlet {
                 orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
                 orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
                 orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
+                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
                 String url = request.getContextPath() + "/WEB-INF/book/Vnpay.jsp";
                 RequestDispatcher dispatcher = request.getRequestDispatcher(url);
                 dispatcher.forward(request, response);
@@ -117,8 +132,8 @@ public class VerifySignature extends HttpServlet {
                 StatusOrder statusOrder = new StatusOrder(1);
                 orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
                 orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
+                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
                 orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
-
                 String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
                 response.sendRedirect(redirectUrl);
             }

@@ -7,23 +7,32 @@ public class OrderSignature {
     private Order orderId;
     private String hash;
     private String signature;
-
+    private boolean isSignatureVerified;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
     // Constructor
-    public OrderSignature(int id, Order orderId, String hash, String signature,  Timestamp createdAt, Timestamp updatedAt) {
+    public OrderSignature(int id, Order orderId, String hash, String signature,  Timestamp createdAt, Timestamp updatedAt,boolean isSignatureVerified) {
         this.id = id;
         this.orderId = orderId;
         this.hash = hash;
         this.signature = signature;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.isSignatureVerified = isSignatureVerified;
     }
 
     public OrderSignature(Order orderId, String hash) {
         this.orderId = orderId;
         this.hash = hash;
+    }
+
+    public boolean isSignatureVerified() {
+        return isSignatureVerified;
+    }
+
+    public void setSignatureVerified(boolean signatureVerified) {
+        isSignatureVerified = signatureVerified;
     }
 
     // Getters and Setters
