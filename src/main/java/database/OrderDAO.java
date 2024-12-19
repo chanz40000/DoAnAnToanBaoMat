@@ -380,6 +380,39 @@ public class OrderDAO extends AbsDAO<Order>{
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
                 int statusSignature = rs.getInt("signature_status_id");
+
+                // Kiểm tra và cập nhật trạng thái signature_status_id nếu cần
+                if (statusSignature == 3) {
+                    String checkSql = "SELECT is_signature_verified FROM order_signatures WHERE order_id = ?";
+                    PreparedStatement checkSt = con.prepareStatement(checkSql);
+                    checkSt.setInt(1, idImport);
+                    ResultSet checkRs = checkSt.executeQuery();
+
+                    boolean shouldUpdate = false;
+
+                    while (checkRs.next()) {
+                        boolean isSignatureVerified = checkRs.getBoolean("is_signature_verified");
+                        if (!isSignatureVerified) {
+                            shouldUpdate = true;
+                            break;
+                        }
+                    }
+
+                    checkRs.close();
+                    checkSt.close();
+
+                    if (shouldUpdate) {
+                        String updateSql = "UPDATE orders SET signature_status_id = 2 WHERE order_id = ?";
+                        PreparedStatement updateSt = con.prepareStatement(updateSql);
+                        updateSt.setInt(1, idImport);
+                        updateSt.executeUpdate();
+                        updateSt.close();
+
+                        // Cập nhật giá trị trong biến
+                        statusSignature = 2;
+                    }
+                }
+
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -476,6 +509,39 @@ public class OrderDAO extends AbsDAO<Order>{
                 double shippingFee = rs.getDouble("shipping_fee");
                 int status = rs.getInt("status_id");
                 int statusSignature = rs.getInt("signature_status_id");
+
+                // Kiểm tra và cập nhật trạng thái signature_status_id nếu cần
+                if (statusSignature == 3) {
+                    String checkSql = "SELECT is_signature_verified FROM order_signatures WHERE order_id = ?";
+                    PreparedStatement checkSt = con.prepareStatement(checkSql);
+                    checkSt.setInt(1, idImport);
+                    ResultSet checkRs = checkSt.executeQuery();
+
+                    boolean shouldUpdate = false;
+
+                    while (checkRs.next()) {
+                        boolean isSignatureVerified = checkRs.getBoolean("is_signature_verified");
+                        if (!isSignatureVerified) {
+                            shouldUpdate = true;
+                            break;
+                        }
+                    }
+
+                    checkRs.close();
+                    checkSt.close();
+
+                    if (shouldUpdate) {
+                        String updateSql = "UPDATE orders SET signature_status_id = 2 WHERE order_id = ?";
+                        PreparedStatement updateSt = con.prepareStatement(updateSql);
+                        updateSt.setInt(1, idImport);
+                        updateSt.executeUpdate();
+                        updateSt.close();
+
+                        // Cập nhật giá trị trong biến
+                        statusSignature = 2;
+                    }
+                }
+
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);

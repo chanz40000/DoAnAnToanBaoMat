@@ -39,11 +39,12 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
+                boolean isVerify = rs.getBoolean("is_signature_verified");
 
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
                 Order order = new OrderDAO().selectById(orderId);
 
-                OrderSignature orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt);
+                OrderSignature orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt, isVerify);
                 orderSignatures.add(orderSignature);
             }
 
@@ -80,11 +81,12 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 String signature = rs.getString("signature");
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
+                boolean isVerify = rs.getBoolean("is_signature_verified");
 
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
                 Order order = new OrderDAO().selectById(orderId);
 
-                orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt);
+                orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt, isVerify);
             }
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
@@ -119,12 +121,12 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
+                boolean isVerify = rs.getBoolean("is_signature_verified");
 
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
-                Order order = new OrderDAO().selectById(id);
+                Order order = new OrderDAO().selectById(orderId);
 
-
-                orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt);
+                orderSignature = new OrderSignature(id, order, hash, signature, createdAt, updatedAt, isVerify);
             }
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
@@ -143,7 +145,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             Connection con = JDBCUtil.getConnection();
 
             // Tạo câu lệnh SQL
-            String sql = "INSERT INTO order_signatures (order_id, hash, signature, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO order_signatures (order_id, hash, signature, created_at, updated_at, is_signature_verified) VALUES (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, orderSignature.getOrderId().getOrderId());
@@ -151,6 +153,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             ps.setString(3, orderSignature.getSignature());
             ps.setTimestamp(4, orderSignature.getCreatedAt());
             ps.setTimestamp(5, orderSignature.getUpdatedAt());
+            ps.setBoolean(6, orderSignature.isSignatureVerified());
 
             result = ps.executeUpdate();
 
@@ -213,7 +216,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             Connection con = JDBCUtil.getConnection();
 
             // Tạo câu lệnh SQL
-            String sql = "UPDATE order_signatures SET order_id = ?, hash = ?, signature = ?, created_at = ?, updated_at = ? WHERE id = ?";
+            String sql = "UPDATE order_signatures SET order_id = ?, hash = ?, signature = ?, created_at = ?, updated_at = ?, is_signature_verified=? WHERE id = ?";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, orderSignature.getOrderId().getOrderId());
@@ -221,8 +224,8 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             ps.setString(3, orderSignature.getSignature());
             ps.setTimestamp(4, orderSignature.getCreatedAt());
             ps.setTimestamp(5, orderSignature.getUpdatedAt());
-            ps.setInt(6, orderSignature.getId());
-
+            ps.setBoolean(6, orderSignature.isSignatureVerified());
+            ps.setInt(7, orderSignature.getId());
             result = ps.executeUpdate();
 
             // Đóng kết nối
@@ -239,14 +242,37 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             // Tạo kết nối đến cơ sở dữ liệu
             Connection con = JDBCUtil.getConnection();
 
-            // Tạo câu lệnh SQL để cập nhật signature và status
+            // Tạo câu lệnh SQL để cập nhật signature và is_signature_verified
             String sql = "UPDATE order_signatures SET signature = ? WHERE order_id = ?";
 
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, signature); // Gán giá trị signature mới
-            ps.setInt(2, orderId);      // Gán giá trị orderId
+            ps.setString(1, signature);      // Gán giá trị signature mới
+            ps.setInt(2, orderId);           // Gán giá trị orderId
 
-            result = ps.executeUpdate(); // Thực thi câu lệnh cập nhật
+            result = ps.executeUpdate();     // Thực thi câu lệnh cập nhật
+
+            // Đóng kết nối
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // Ném ngoại lệ nếu có lỗi xảy ra
+        }
+        return result; // Trả về số dòng bị ảnh hưởng
+    }
+    public int updateVerifySignatureByOrderId(int orderId, boolean signature) {
+        int result = 0;
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu lệnh SQL để cập nhật signature và is_signature_verified
+            String sql = "UPDATE order_signatures SET is_signature_verified = ? WHERE order_id = ?";
+
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setBoolean(1, signature);          // Gán giá trị true cho is_signature_verified
+            ps.setInt(2, orderId);           // Gán giá trị orderId
+
+            result = ps.executeUpdate();     // Thực thi câu lệnh cập nhật
 
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
