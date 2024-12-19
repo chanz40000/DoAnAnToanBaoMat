@@ -110,6 +110,8 @@
 		text-align: left;
 		border: 1px solid #ddd;
 	}
+
+
 </style>
 
 </head>
@@ -211,7 +213,7 @@
 									</div>
 									<div class="card-body">
 										<div style="text-align: center;color: red" class="red" id="baoLoi1">${message} </div>
-
+										<div id="notification"></div>
 										<table>
 											<thead>
 											<tr>
@@ -300,6 +302,23 @@
 			<circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg>
 	</div>
 </div>
+<script>
+	// Lấy dữ liệu từ Servlet gửi qua
+	const message = "<%= request.getAttribute("message") != null ? request.getAttribute("message") : "" %>";
+	const type = "<%= request.getAttribute("type") != null ? request.getAttribute("type") : "" %>";
+
+	if (message) {
+		const notification = document.getElementById('notification');
+		notification.className = type; // success hoặc error
+		notification.innerHTML = message;
+		notification.style.display = 'block';
+
+		// Ẩn thông báo sau 3 giây
+		setTimeout(() => {
+			notification.style.display = 'none';
+		}, 3000);
+	}
+</script>
 <script>
 	// Handle the file load event
 	document.getElementById('loadFileButton').addEventListener('click', function() {

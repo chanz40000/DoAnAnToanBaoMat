@@ -396,7 +396,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
         return serializedData.toString();
     }
 
-    public List<Order> validateOrdersForUser(int userId) throws SQLException, NoSuchAlgorithmException {
+    public static List<Order> validateOrdersForUser(int userId) throws SQLException, NoSuchAlgorithmException {
         // Khởi tạo đối tượng OrderSignatureDAO để sử dụng các phương thức cần thiết
         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
 
@@ -445,7 +445,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
     }
 
     // Main method for testing the validateOrderHash method
-    public void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException {
         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
 
         int orderId = 1; // Example order ID to test with
