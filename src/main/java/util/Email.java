@@ -213,28 +213,125 @@ public class Email {
 
 	}
 
-	public static void sendEmailHashOrderToUser(String name, String hash, Order order) {
-		String emailSubject = "Mã xác thực của đơn hàng MDH" +order.getOrderId()+ " bạn cần ký tên";
-		String emailBody = "<!DOCTYPE html>" +
-				"<html>" +
-				"<head>" +
-				"<meta charset='UTF-8'>" +
-				"<title>Xác thực chữ ký</title>" +
-				"</head>" +
-				"<body>" +
-				"<h1>Xin chào " + name + "</h1>" +
-				"<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
-				"<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
-				"<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
-				"<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
-				"<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
-				"<p>Trân trọng,</p>" +
-				"<p>Cửa hàng của chúng tôi</p>" +
-				"</body>" +
-				"</html>";
+//	public static void sendEmailHashOrderToUser(String name, String hash, Order order) {
+//		String emailSubject = "Mã xác thực của đơn hàng MDH" +order.getOrderId()+ " bạn cần ký tên";
+//		String emailBody = "<!DOCTYPE html>" +
+//				"<html>" +
+//				"<head>" +
+//				"<meta charset='UTF-8'>" +
+//				"<title>Xác thực chữ ký</title>" +
+//				"</head>" +
+//				"<body>" +
+//				"<h1>Xin chào " + name + "</h1>" +
+//				"<h1>Mã đơn hàng của bạn là: " + "MDH" + order.getOrderId() + "</h1>" +
+//				"<p>Chúng tôi gửi bạn mã bạn cần để ký tên xác nhận đơn hàng!</p>" +
+//				"<h2>Mã của bạn là: <strong>" + hash + "</strong></h2>" +
+//				"<p>Vui lòng sử dụng mã này để ký tên và gửi chữ ký cho chúng tôi xác nhận đơn hàng của bạn.</p>" +
+//				"<p>Sau 24h nếu bạn không gửi chữ ký, đơn hàng sẽ tự động bị hủy.</p>" +
+//				"<p>Trân trọng,</p>" +
+//				"<p>Cửa hàng của chúng tôi</p>" +
+//				"</body>" +
+//				"</html>";
+//
+//		Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+//	}
+public static void sendEmailHashOrderToUser(String name, String hash, Order order) {
+	String emailSubject = "[Xác Thực] Mã Xác Thực Đơn Hàng MDH" + order.getOrderId();
+	String emailBody = "<!DOCTYPE html>" +
+			"<html>" +
+			"<head>" +
+			"<meta charset='UTF-8'>" +
+			"<title>Xác thực chữ ký</title>" +
+			"</head>" +
+			"<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>" +
+			"<div style='max-width: 600px; margin: auto;'>" +
+			"<h1 style='color: #007bff;'>Chào bạn, " + name + "!</h1>" +
+			"<h2 style='color: #555;'>Mã đơn hàng của bạn: <span style='color: #000;'>MDH" + order.getOrderId() + "</span></h2>" +
+			"<p style='font-size: 16px;'>" +
+			"Chúng tôi gửi bạn mã xác thực để hoàn tất ký tên xác nhận đơn hàng." +
+			"</p>" +
+			"<p style='font-size: 18px; font-weight: bold; color: #d9534f;'>Mã xác thực của bạn là: <strong>" + hash + "</strong></p>" +
+			"<p style='font-size: 16px;'>Ngoài ra, mã xác thực cũng được đính kèm trong tệp tin để bạn tiện theo dõi.</p>" +
+			"<p style='font-size: 16px; color: #FFD700;'>Lưu ý: Nếu sau 24 giờ bạn không gửi lại chữ ký xác nhận, đơn hàng sẽ tự động bị hủy.</p>" +
+			"<p style='font-size: 16px;'>Trân trọng,<br/>Đội ngũ hỗ trợ của chúng tôi</p>" +
+			"</div>" +
+			"</body>" +
+			"</html>";
 
-		Email.sendEmail(order.getUser().getEmail(), emailBody, emailSubject);
+	String fileName = "hash_order_MDH" + order.getOrderId() + ".txt";
+	String fileContent = hash;
+
+	sendEmailWithAttachment(order.getUser().getEmail(), emailSubject, emailBody, fileName, fileContent);
+}
+
+
+	public static void sendEmailHashOrderToUserWithAttachment(String to, String subject, String body, String nameFile, String contentFile) {
+		// Configure mail server properties
+		Properties props = new Properties();
+		props.put("mail.smtp.host", "smtp.gmail.com");
+		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+
+		// Create authenticator
+		Authenticator auth = new Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(from, password);
+			}
+		};
+
+		// Create a new email session
+		Session session = Session.getInstance(props, auth);
+
+		try {
+			// Create a new email message
+			MimeMessage message = new MimeMessage(session);
+
+			// Set email attributes
+			message.setFrom(new InternetAddress(from));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
+			message.setSubject(subject, "UTF-8");
+			message.setSentDate(new Date());
+
+			// Create a multipart message for attachment
+			Multipart multipart = new MimeMultipart();
+
+			// Add text part
+			MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setContent(body, "text/html; charset=UTF-8");
+			multipart.addBodyPart(textPart);
+
+			// Write content to a temporary file
+			File attachment = new File(nameFile);
+			try (FileWriter writer = new FileWriter(attachment)) {
+				writer.write(contentFile);
+			}
+
+			// Add attachment part
+			if (attachment.exists()) {
+				MimeBodyPart attachmentPart = new MimeBodyPart();
+				attachmentPart.attachFile(attachment);
+				multipart.addBodyPart(attachmentPart);
+			}
+
+			// Set the complete message parts
+			message.setContent(multipart);
+
+			// Send the message
+			Transport.send(message);
+			System.out.println("Email sent successfully with attachment.");
+
+			// Delete the temporary file after sending
+			if (attachment.exists()) {
+				attachment.delete();
+			}
+		} catch (Exception e) {
+			System.out.println("Error while sending email with attachment.");
+			e.printStackTrace();
+		}
 	}
+
 	public static void sendEmailWithAttachment(String to, String subject, String body, String nameFile, String contentFile) {
 		// Configure mail server properties
 		Properties props = new Properties();
