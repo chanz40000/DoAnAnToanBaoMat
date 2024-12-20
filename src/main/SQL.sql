@@ -832,8 +832,3 @@ CREATE TABLE orderdetails (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2024-12-05 21:49:48
-SELECT * FROM orderstatus;
-SELECT * FROM users;
-SELECT * FROM order_signatures;
-SELECT * FROM orders;
-SELECT * FROM orderdetails

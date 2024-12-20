@@ -137,6 +137,37 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
         return orderSignature;
     }
+    public String getSignatureOrderByOrderId(int orderId) {
+        String signature = null;
+
+        try {
+            // Create a connection to the database
+            Connection con = JDBCUtil.getConnection();
+
+            // Create the SQL query to get the signature based on the order_id
+            String sql = "SELECT signature FROM order_signatures WHERE order_id = ?";
+
+            // Prepare the statement
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, orderId);
+
+            // Execute the query
+            ResultSet rs = st.executeQuery();
+
+            // If a record is found, retrieve the signature
+            if (rs.next()) {
+                signature = rs.getString("signature");
+            }
+
+            // Close the connection
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching signature for orderId: " + orderId, e);
+        }
+
+        return signature;
+    }
     @Override
     public int insert(OrderSignature orderSignature) throws SQLException {
         int result = 0;
