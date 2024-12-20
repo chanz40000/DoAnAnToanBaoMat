@@ -501,15 +501,15 @@
 
                             <div id="statusBiThayDoi" class="container tab-pane fade">
                                 <c:set var="statusChanged" value="changed"/> <!-- Biến để xác định các đơn hàng bị thay đổi -->
-
+                                <c:set var="statusBiThayDoi" value="13"/>
                                 <!-- Kiểm tra và hiển thị các đơn hàng bị thay đổi -->
-                                <c:if test="${ empty orderSignatureDAO.validateOrdersForUser(id)}">
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusId(id, statusBiThayDoi)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderSignatureDAO.validateOrdersForUser(id)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusBiThayDoi)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>

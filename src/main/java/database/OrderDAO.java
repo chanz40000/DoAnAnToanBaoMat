@@ -610,6 +610,35 @@ public class OrderDAO extends AbsDAO<Order>{
 
         return orders;
     }
+    public int selectLatestOrderIdByUserAndPayment(int userId) {
+        int orderId = -1;  // Default value to indicate no order found
+        try {
+            // Establish a connection to the database
+            Connection con = JDBCUtil.getConnection();
+
+            // SQL query to get the most recent order's order_id for a specific user with payment_id = 1
+            String sql = "SELECT order_id FROM orders WHERE user_id = ? AND payment_id = 1 ORDER BY booking_date DESC LIMIT 1";
+
+            // Prepare the statement
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, userId);  // Set the user_id parameter
+
+            // Execute the query
+            ResultSet rs = st.executeQuery();
+
+            // If a record is found, retrieve the order_id
+            if (rs.next()) {
+                orderId = rs.getInt("order_id");
+            }
+
+            // Close the connection
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orderId;
+    }
     @Override
     public int insert(Order order) {
         int result = 0;
