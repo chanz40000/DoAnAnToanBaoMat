@@ -191,6 +191,9 @@
                         <c:if test="${order.status.statusId == 8}">
                             <div style="color: #c31625; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #c31625;" class="fa-solid fa-arrow-right-arrow-left"></i></div>
                         </c:if>
+                        <c:if test="${order.status.statusId == 9}">
+                            <div style="color: #b98d3c; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #b98d3c" class="fa-solid fa-boxes-packing"></i></div>
+                        </c:if>
                         <c:if test="${order.status.statusId == 10}">
                             <div style="color: #c264ff; font-weight: bold"><span>Trạng thái:</span> ${order.status.statusName} <i style="color: #c264ff" class="fa-solid fa-box-open"></i></div>
                         </c:if>
