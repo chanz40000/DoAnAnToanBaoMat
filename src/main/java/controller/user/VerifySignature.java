@@ -122,7 +122,8 @@ public class VerifySignature extends HttpServlet {
                 orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
                 orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
                 orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
-                String url = request.getContextPath() + "/WEB-INF/book/Vnpay.jsp";
+                String url = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+
                 RequestDispatcher dispatcher = request.getRequestDispatcher(url);
                 dispatcher.forward(request, response);
 

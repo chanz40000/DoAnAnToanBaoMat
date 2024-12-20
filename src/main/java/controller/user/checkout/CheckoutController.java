@@ -42,8 +42,6 @@ public class CheckoutController extends HttpServlet {
     }
 
     @Override
-
-
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -101,12 +99,8 @@ public class CheckoutController extends HttpServlet {
         PaymentDAO paymentDAO = new PaymentDAO();
         Payment payment = paymentDAO.selectById(paymentId);
         StatusOrder statusOrder = new StatusOrder(11);
-////        StatusOrder statusOrderPayment = new StatusOrder(9);
-//        StatusOrder statusOrder = (paymentId == 1) ? new StatusOrder(9) : new StatusOrder(1);
-        StatusSignature chuaXacMinh = new StatusSignature(1);
-        if (paymentId == 1){
+        StatusSignature chuaXacMinh = new StatusSignature(1); // Assuming 1 means "Not Verified"
 
-        }
         // Sử dụng LocalDateTime và DateTimeFormatter để có timestamp với giây
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -197,7 +191,7 @@ public class CheckoutController extends HttpServlet {
                         String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
 
                         System.out.println("Serialized Data (Checkout): " + serializedData.toString());
-                        System.out.println("Hash (Checkout): " + hash + " cua don hang: "+order.getOrderId());
+                        System.out.println("Hash (Checkout): " + hash + " cua don hang: " + order.getOrderId());
 
                         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
 
@@ -205,10 +199,14 @@ public class CheckoutController extends HttpServlet {
                         int addHash = orderSignatureDAO.insert(orderSignature);
 
                         if (addHash > 0) {
-                            //gửi mail
+                            // Gửi mail
                             Email.sendEmailHashOrderToUser(user.getName(), hash, order);
-
                         }
+
+                        // Kiểm tra và cập nhật trạng thái
+
+
+                        // Vòng lặp kiểm tra và cập nhật trạng thái đơn hàng khi có thay đổi về hash
                         while (true) {
                             // Lấy lại serializedData và tính lại hash
                             String newSerializedData = orderSignatureDAO.getSerializedDataForOrder(order.getOrderId());
@@ -216,17 +214,26 @@ public class CheckoutController extends HttpServlet {
 
                             // Lấy hash cũ từ cơ sở dữ liệu
                             String storedHash = orderSignatureDAO.getHashByOrderId(order.getOrderId());
+                            Order updatedOrder = orderDAO.selectById(order.getOrderId());
+                            String orderSignature1 = orderSignatureDAO.getSignatureOrderByOrderId(order.getOrderId());
+
 
                             // So sánh hash cũ và hash mới
-                            if (storedHash != null && !storedHash.equals(newHash)) {
-                                // Nếu hash không giống nhau, cập nhật trạng thái đơn hàng thành 13 (có thể là trạng thái "Đơn hàng bị thay đổi")
+                            // Kiểm tra nếu hash không giống nhau hoặc có chữ ký nhưng trạng thái không đúng
+                            if (storedHash != null && !storedHash.equals(newHash) ||
+                                    (storedHash.equals(newHash) && updatedOrder.getStatusSignature().getStatusSignatureId() == 3 && orderSignature1 == null) ||
+                                    (storedHash.equals(newHash) && updatedOrder.getStatus().getStatusId() != 11 && orderSignature1 == null) ||
+                                    (storedHash.equals(newHash) && updatedOrder.getStatusSignature().getStatusSignatureId() != 3 && orderSignature1 != null)) {
+
+                                // Cập nhật trạng thái của đơn hàng thành 13 nếu các điều kiện trên đúng
                                 StatusOrder statusChanged = new StatusOrder(13);
-                                orderDAO.updateStatusOrder(order.getOrderId(), statusChanged);
+                                orderDAO.updateStatusOrder(updatedOrder.getOrderId(), statusChanged);
 
-                                // Gửi mail cho người dùng thông báo đơn hàng đã bị thay đổi
-                                Email.sendNotify(user, order, orderDetailDAO.selectByOrderId(order.getOrderId()));
+                                // Gửi thông báo qua email
+                                Email.sendNotify(user, updatedOrder, orderDetailDAO.selectByOrderId(updatedOrder.getOrderId()));
 
-                                break; // Thoát khỏi vòng lặp
+                                // Thoát khỏi vòng lặp
+                                break;
                             }
 
                             // Đợi một giây trước khi kiểm tra lại
@@ -238,36 +245,25 @@ public class CheckoutController extends HttpServlet {
                     }
                 });
 
-
-
-
-
                 // Xóa giỏ hàng sau khi đặt hàng thành công
                 cart.clearCart();
+                if (paymentId == 1) {
+                    request.getRequestDispatcher("/WEB-INF/book/Vnpay.jsp").forward(request, response);
+                } else {
+                    // Xóa các thông tin liên quan đến coupon và giảm giá trong session
+                    session.removeAttribute("appliedCouponCode");
+                    session.removeAttribute("discountValue");
+                    session.removeAttribute("discountType");
+                    session.removeAttribute("discount");
+                    session.removeAttribute("newTotal");
 
-                session.removeAttribute("appliedCouponCode");
-                session.removeAttribute("discountValue");
-                session.removeAttribute("discountType");
-                session.removeAttribute("discount");
-                session.removeAttribute("newTotal");
-                response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
-                return;
+                    // Chuyển hướng đến trang xác nhận đơn hàng
+                    response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
+                    return;
+                }
+
             }
 
         }
-        // Trả về kết quả
-
-//        JsonObject jsonResponse = new JsonObject();
-
-//        jsonResponse.addProperty("success", true);
-
-//        jsonResponse.addProperty("newTotal", newTotal);
-
-//        jsonResponse.addProperty("discount", discount);
-
-        // Tạo ObjectMapper để chuyển đối tượng Order thành JSON
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderJson = objectMapper.writeValueAsString(order);
-        request.setAttribute("orderJson", orderJson);
     }
 }
