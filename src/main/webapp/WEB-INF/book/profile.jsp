@@ -209,23 +209,6 @@
 												</div>
 											</div>
 
-											<!-- Thêm thông tin khóa và chữ ký điện tử -->
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Khóa riêng tư:</label>
-												<input type="file" class="form-control" name="privateKey" accept=".txt" required />
-											</div>
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Khóa công khai:</label>
-												<input type="file" class="form-control" name="publicKey" accept=".txt" required />
-											</div>
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Chữ ký điện tử:</label>
-												<input type="file" class="form-control" name="digitalSignature" accept=".txt" />
-											</div>
-
-											<div class="mb-3">
-												<button class="btn btn-primary" type="submit">Cập nhật thông tin chữ ký</button>
-											</div>
 										</form>
 									</div>
 								</div>
@@ -240,7 +223,6 @@
 										Dưới đây là các khóa xác thực của bạn
 									</div>
 									<div class="card-body">
-										<div style="text-align: center;color: red" class="red" id="baoLoi1">${message} </div>
 										<div id="notification"></div>
 										<table>
 											<thead>
