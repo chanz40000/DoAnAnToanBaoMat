@@ -110,7 +110,35 @@
 		text-align: left;
 		border: 1px solid #ddd;
 	}
+	/* Thông báo mặc định */
+	#notification {
+		display: none; /* Ẩn mặc định */
+		position: fixed;
+		top: 50%; /* Giữa màn hình theo chiều dọc */
+		left: 50%; /* Giữa màn hình theo chiều ngang */
+		transform: translate(-50%, -50%); /* Căn giữa hoàn toàn */
+		padding: 20px 30px;
+		font-size: 16px;
+		border-radius: 8px;
+		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+		z-index: 1000;
+		text-align: center;
+		white-space: pre-line;
+	}
 
+	/* Kiểu lỗi */
+	.error {
+		background-color: #f8d7da;
+		color: #721c24;
+		border: 2px solid #f5c6cb;
+	}
+
+	/* Kiểu thành công */
+	.success {
+		background-color: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
 
 </style>
 
@@ -181,23 +209,6 @@
 												</div>
 											</div>
 
-											<!-- Thêm thông tin khóa và chữ ký điện tử -->
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Khóa riêng tư:</label>
-												<input type="file" class="form-control" name="privateKey" accept=".txt" required />
-											</div>
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Khóa công khai:</label>
-												<input type="file" class="form-control" name="publicKey" accept=".txt" required />
-											</div>
-											<div class="mb-3">
-												<label style="font-size: 22px" class="small mb-1">Chữ ký điện tử:</label>
-												<input type="file" class="form-control" name="digitalSignature" accept=".txt" />
-											</div>
-
-											<div class="mb-3">
-												<button class="btn btn-primary" type="submit">Cập nhật thông tin chữ ký</button>
-											</div>
 										</form>
 									</div>
 								</div>
@@ -212,7 +223,6 @@
 										Dưới đây là các khóa xác thực của bạn
 									</div>
 									<div class="card-body">
-										<div style="text-align: center;color: red" class="red" id="baoLoi1">${message} </div>
 										<div id="notification"></div>
 										<table>
 											<thead>
