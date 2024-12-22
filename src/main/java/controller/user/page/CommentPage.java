@@ -18,9 +18,9 @@ public class CommentPage extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("userC");
-        ArrayList<Comment> comments = new CommentDAO().selectCByuserid(user.getUserId());
-        request.setAttribute("comments",comments);
+       // User user = (User) session.getAttribute("userC");
+       // ArrayList<Comment> comments = new CommentDAO().selectCByuserid(user.getUserId());
+       // request.setAttribute("comments",comments);
         request.getRequestDispatcher("/WEB-INF/book/Comment.jsp").forward(request,response);
     }
 
