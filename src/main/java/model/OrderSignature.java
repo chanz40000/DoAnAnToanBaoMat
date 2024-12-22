@@ -5,26 +5,30 @@ import java.sql.Timestamp;
 public class OrderSignature {
     private int id;
     private Order orderId;
-    private String hash;
     private String signature;
     private boolean isSignatureVerified;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
     // Constructor
-    public OrderSignature(int id, Order orderId, String hash, String signature,  Timestamp createdAt, Timestamp updatedAt,boolean isSignatureVerified) {
+    public OrderSignature(int id, Order orderId,  String signature,  Timestamp createdAt, Timestamp updatedAt,boolean isSignatureVerified) {
         this.id = id;
         this.orderId = orderId;
-        this.hash = hash;
         this.signature = signature;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isSignatureVerified = isSignatureVerified;
     }
 
+    public OrderSignature(Order orderId, String signature, boolean isSignatureVerified, Timestamp createdAt) {
+        this.orderId = orderId;
+        this.signature = signature;
+        this.isSignatureVerified = isSignatureVerified;
+        this.createdAt = createdAt;
+    }
+
     public OrderSignature(Order orderId, String hash) {
         this.orderId = orderId;
-        this.hash = hash;
     }
 
     public boolean isSignatureVerified() {
@@ -45,13 +49,7 @@ public class OrderSignature {
     }
 
 
-    public String getHash() {
-        return hash;
-    }
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
 
     public String getSignature() {
         return signature;
@@ -94,7 +92,6 @@ public class OrderSignature {
         return "OrderSignature{" +
                 "id=" + id +
                 ", orderId=" + orderId +
-                ", hash='" + hash + '\'' +
                 ", signature='" + signature + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
