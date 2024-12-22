@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @WebServlet(name = "VerifySignature", value = "/VerifySignature")
@@ -64,12 +67,12 @@ public class VerifySignature extends HttpServlet {
 
             KeyUserDAO keyUserDAO = new KeyUserDAO();
             KeyUser userKey = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
-            String publicKey = userKey.getKey();
+            String publicKey = userKey.getKey().trim();
 
             OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
             List<OrderDetail> orderDetails = orderDetailDAO.selectByOrderId(order.getOrderId());
             OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-            OrderSignature orderSignature = orderSignatureDAO.selectByOrderId(order.getOrderId());
+//            OrderSignature orderSignature = orderSignatureDAO.selectByOrderId(order.getOrderId());
 //
             // Serialize dữ liệu để tạo chuỗi hash
             StringBuilder serializedData = new StringBuilder();
@@ -92,11 +95,12 @@ public class VerifySignature extends HttpServlet {
             String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
             System.out.println("Serialized Data (Verify): " + serializedData.toString());
             System.out.println("Hash (Verify): " + hash+ " cua don hang: "+order.getOrderId());
-
+            System.out.println("Publickey: " + publicKey);
+            System.out.println("Chu ky: "+signature);
 
             RSA rsa = new RSA();
-//            boolean isValid = rsa.verifySignature(orderSignature.getHash(), signature, publicKey);
-            boolean isValid = rsa.verifySignature(hash, signature, publicKey);
+//            boolean isValid = rsa.validateSignature(orderSignature.getHash(), signature, publicKey);
+            boolean isValid = RSA.validateSignature(hash, publicKey, signature.trim());
             if (!isValid) {
                 String errorMessage = "Chữ ký không hợp lệ!";
                 request.setAttribute("Error", errorMessage); // Gán lỗi vào request attribute
@@ -114,29 +118,37 @@ public class VerifySignature extends HttpServlet {
             OrderDAO orderDAO = new OrderDAO();
             StatusSignature statusSignature = new StatusSignature(3);
             boolean isVerify = true;
+            // Sử dụng LocalDateTime và DateTimeFormatter để có timestamp với giây
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = now.format(formatter);
+            Timestamp signTimestamp = Timestamp.valueOf(formattedDate);
+            OrderSignature orderSignature = new OrderSignature(order, signature, true, signTimestamp);
+            int addHash = orderSignatureDAO.insert(orderSignature);
+            if (addHash > 0) {
+                if (order.getPayment().getPaymentId() == 1) {
+                    StatusOrder statusOrder = new StatusOrder(9);
+                    orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
+                    orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
 
-            if (order.getPayment().getPaymentId() == 1){
-                StatusOrder statusOrder = new StatusOrder(9);
+//                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
+//                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
+                    String url = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
 
-                orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
-                orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
-                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
-                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
-                String url = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+                    RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                    dispatcher.forward(request, response);
 
-                RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-                dispatcher.forward(request, response);
+                    return;
+                } else {
 
-                return;
-            }else {
-
-                StatusOrder statusOrder = new StatusOrder(1);
-                orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
-                orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
-                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
-                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
-                String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
-                response.sendRedirect(redirectUrl);
+                    StatusOrder statusOrder = new StatusOrder(1);
+                    orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
+                    orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
+//                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
+//                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
+                    String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+                    response.sendRedirect(redirectUrl);
+                }
             }
             eb.setError((String) request.getAttribute("Error"));
             request.setAttribute("errorBean", eb);
