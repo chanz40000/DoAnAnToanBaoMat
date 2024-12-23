@@ -816,7 +816,7 @@ CREATE TABLE orderdetails (
   CONSTRAINT orderdetails_ibfk_1 FOREIGN KEY (order_id) REFERENCES orders (order_id),
   CONSTRAINT orderdetails_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (product_id)
 );
-
+ALTER TABLE order_signatures ADD COLUMN is_signature_verified BOOLEAN DEFAULT FALSE;
 
 
 
