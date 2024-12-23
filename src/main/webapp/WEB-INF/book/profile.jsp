@@ -279,14 +279,9 @@
 
 										<form id="keyForm" method="post" action="CreateKeyServlet">
 											<div class="form-group">
-												<label for="inputKey">Nhập khóa của bạn:</label>
-												<textarea class="form-control" name="keyContent" id="inputKey" rows="4" placeholder="Nhập khóa tại đây"></textarea>
+												<label for="passwordlo">Nhập pass của bạn:</label>
+												<input type="password" name="password" id="passwordlo" placeholder="Mật khẩu"/>
 											</div>
-											<div class="form-group mt-3">
-												<label for="uploadFile">Hoặc tải khóa từ tệp:</label>
-												<input type="file" class="form-control-file"  id="uploadFile" accept=".txt" />
-											</div>
-											<button type="button" class="btn btn-primary mt-3" id="loadFileButton">Tải tệp</button>
 											<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>
 										</form>
 									</div>
@@ -347,20 +342,6 @@
 		}
 	});
 
-	// // Handle form submission (optional, based on your backend handling)
-	// document.getElementById('keyForm').addEventListener('submit', function(e) {
-	// 	e.preventDefault();
-	//
-	// 	const key = document.getElementById('inputKey').value;
-	//
-	// 	if (key.trim() === '') {
-	// 		alert('Vui lòng nhập khóa!');
-	// 	} else {
-	// 		// You can send the key to the server via AJAX or form submission
-	// 		alert('Khóa đã được tạo: ' + key);
-	// 		$('#keyModal').modal('hide'); // Hide the modal after submission
-	// 	}
-	// });
 </script>
 
 	<script src="js/jquery-3.3.1.min.js"></script>

@@ -1,9 +1,11 @@
 package controller.user.changeInfo;
 
 import database.KeyUserDAO;
+import database.UserDAO;
 import model.KeyUser;
 import model.User;
 import util.Email;
+import util.PasswordEncryption;
 import util.RSA;
 
 import javax.servlet.*;
@@ -38,12 +40,23 @@ public class CreateKeyServlet extends HttpServlet {
 
 
         //lay ra private key
-        String privateKey = request.getParameter("keyContent");
-        System.out.println("privateKey: "+ privateKey);
-        System.out.println("publickey: "+publicKey);
-        //kiem tra xem key co khop nhau khong
-        RSA rsa = new RSA();
-        boolean isCreated = rsa.validateRSAKeys(publicKey, privateKey);
+
+//        System.out.println("privateKey: "+ privateKey);
+//        System.out.println("publickey: "+publicKey);
+//        //kiem tra xem key co khop nhau khong
+//        RSA rsa = new RSA();
+//        boolean isCreated = rsa.validateRSAKeys(publicKey, privateKey);
+
+
+        boolean isCreated;
+        String password = request.getParameter("password");
+        password = PasswordEncryption.toSHA1(password);
+
+        if(user.getPassword().equals(password)){
+            isCreated = true;
+        }else{
+            isCreated = false;
+        }
 
         if (isCreated) {
             this.updatekeyy(keyUser);
@@ -51,7 +64,7 @@ public class CreateKeyServlet extends HttpServlet {
             request.setAttribute("type", "success");
         } else {
             request.setAttribute("errorBean", "Tạo mới khóa thất bại. Vui lòng thử lại!");
-            request.setAttribute("message", "Tạo khóa thất bại. Vui lòng thử lại!");
+            request.setAttribute("message", "Mật khẩu sai. Vui lòng thử lại!");
             request.setAttribute("type", "error");
         }
 
