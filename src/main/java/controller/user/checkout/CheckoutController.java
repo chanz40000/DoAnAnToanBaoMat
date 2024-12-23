@@ -174,15 +174,15 @@ public class CheckoutController extends HttpServlet {
                     try {
                         // Serialize dữ liệu để tạo chuỗi hash
                         StringBuilder serializedData = new StringBuilder();
-                        Order orderInDatabase = orderDAO.selectById(order.getOrderId());
+//                        Order orderInDatabase = orderDAO.selectById(order.getOrderId());
                         serializedData.append("user_id:").append(user.getUserId()).append(",");
                         serializedData.append("email:").append(user.getEmail()).append(",");
-                        serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
-                        serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
-                        serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
-                        serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
+                        serializedData.append("order_id:").append(order.getOrderId()).append(",");
+                        serializedData.append("total_price:").append(order.getTotalPrice()).append(",");
+                        serializedData.append("booking_date:").append(order.getBookingDate()).append(",");
+                        serializedData.append("shipping_fee:").append(order.getShippingFee()).append(",");
 
-                        for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
+                        for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(order.getOrderId())) {
                             serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
                             serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
                             serializedData.append("price:").append(cartItem.getPrice()).append(",");
@@ -195,13 +195,26 @@ public class CheckoutController extends HttpServlet {
 
                         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
 
-                        OrderSignature orderSignature = new OrderSignature(order, hash);
-                        int addHash = orderSignatureDAO.insert(orderSignature);
+                        // Kiểm tra nếu hash không null và không rỗng
+                        if (hash != null && !hash.isEmpty()) {
+                            // Lưu thông tin chữ ký vào cơ sở dữ liệu
+                            //OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+                            // Lưu vào cơ sở dữ liệu nếu cần
+                            // orderSignatureDAO.saveOrderSignature(order.getOrderId(), hash);
 
-                        if (addHash > 0) {
-                            // Gửi mail
+                            // Gửi email cho người dùng
                             Email.sendEmailHashOrderToUser(user.getName(), hash, order);
+                        } else {
+                            System.err.println("Lỗi: Không thể tạo hash cho đơn hàng " + order.getOrderId());
                         }
+
+//                        OrderSignature orderSignature = new OrderSignature(order, hash);
+//                        int addHash = orderSignatureDAO.insert(orderSignature);
+
+//                        if (addHash > 0) {
+                            // Gửi mail
+//                            Email.sendEmailHashOrderToUser(user.getName(), hash, order);
+//                        }
 
                         // Kiểm tra và cập nhật trạng thái
 

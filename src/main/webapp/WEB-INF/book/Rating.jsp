@@ -1,6 +1,16 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>    <div class="buttons">
+    <button>Lưu</button>
+    <button>Xóa</button>
+    <button>Xuất Excel</button>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
 <%@ page import="util.FormatCurrency"%>
 <%@page isELIgnored="false" %>
 <!DOCTYPE html>
