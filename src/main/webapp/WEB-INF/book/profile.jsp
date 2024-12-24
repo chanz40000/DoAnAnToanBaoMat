@@ -207,6 +207,12 @@
 												<div class="col-md-6">
 													<label style="font-size: 22px" class="small mb-1">Sinh nhật: ${userC.birthday}</label>
 												</div>
+												<div class="col-md-6">
+													<label style="font-size: 22px" class="small mb-1">Upload Key</label>
+													<button class="btn btn-primary" data-toggle="modal" data-target="#keyModal">
+														Lộ khóa
+													</button>
+												</div>
 											</div>
 
 										</form>
@@ -240,16 +246,14 @@
 											<c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
 												<tr>
 													<td>Khóa ${counter}</td>
-													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
-													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
+													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy HH:mm:ss"/></td>
+													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy HH:mm:ss" /></td>
 													<td>${key.getStatus()}</td> <!-- Hiển thị trạng thái -->
 													<td>
 														<form id="keyForm" method="post" action="CreateKeyServlet">
 															<button
 																	class="btn ${key.getStatus() == 'ON' ? 'btn-warning' : 'btn-secondary'}"
 																${key.getStatus() == 'ON' ? 'type="submit"' : ''}
-																	data-toggle="modal"
-																	data-target="#keyModal"
 																${key.getStatus() == 'ON' ? '' : 'disabled'}>
 																Lộ khóa
 															</button>
@@ -267,34 +271,34 @@
 							</div>
 						</div>
 						<!-- Modal for entering and uploading the key -->
-<%--						<div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="keyModalLabel" aria-hidden="true">--%>
-<%--							<div class="modal-dialog">--%>
-<%--								<div class="modal-content">--%>
-<%--									<div class="modal-header">--%>
-<%--										<h5 class="modal-title" id="keyModalLabel">Nhập khóa hoặc tải lên từ tệp</h5>--%>
-<%--										<button type="button" class="close" data-dismiss="modal" aria-label="Close">--%>
-<%--											<span aria-hidden="true">&times;</span>--%>
-<%--										</button>--%>
-<%--									</div>--%>
-<%--									<c:if test="${not empty message}">--%>
-<%--										<div class="alert ${message.contains('thành công') ? 'alert-success' : 'alert-danger'}">--%>
-<%--												${message}--%>
-<%--										</div>--%>
-<%--									</c:if>--%>
+						<div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="keyModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="keyModalLabel">Nhập khóa hoặc tải lên từ tệp</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<c:if test="${not empty message}">
+										<div class="alert ${message.contains('thành công') ? 'alert-success' : 'alert-danger'}">
+												${message}
+										</div>
+									</c:if>
 
-<%--									<div class="modal-body">--%>
+									<div class="modal-body">
 
-<%--										<form id="keyForm" method="post" action="CreateKeyServlet">--%>
-<%--											<div class="form-group">--%>
-<%--												<label for="passwordlo">Nhập pass của bạn:</label>--%>
-<%--												<input type="password" name="password" id="passwordlo" placeholder="Mật khẩu"/>--%>
-<%--											</div>--%>
-<%--											<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>--%>
-<%--										</form>--%>
-<%--									</div>--%>
-<%--								</div>--%>
-<%--							</div>--%>
-<%--						</div>--%>
+										<form id="keyForm2" method="post" action="CreateKeyServlet">
+											<div class="form-group">
+												<label for="passwordlo">Nhập pass của bạn:</label>
+												<input type="password" name="password" id="passwordlo" placeholder="Mật khẩu"/>
+											</div>
+											<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
 
 
 					</div>

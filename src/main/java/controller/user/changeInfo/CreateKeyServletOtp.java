@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @WebServlet(name = "CreateKeyServletOtp", value = "/CreateKeyServletOtp")
 public class CreateKeyServletOtp extends HttpServlet {
@@ -88,9 +91,12 @@ public class CreateKeyServletOtp extends HttpServlet {
 
     public boolean updatekeyy(KeyUser keyUser) {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
-        Date date = new Date(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = now.format(formatter);
+        Timestamp reportTimestamp = Timestamp.valueOf(formattedDate);
         //DOI NGAY het han
-        keyUser.setExpired_at(date);
+        keyUser.setExpired_at(reportTimestamp);
         //doi status
         keyUser.setStatus("OFF");
         //CAP NHAT VAO DATABASE
@@ -99,7 +105,7 @@ public class CreateKeyServletOtp extends HttpServlet {
         //Them moi mot Key khac cho user
         RSA rsa = new RSA();
         try {
-            keyUserDAO.insert(new KeyUser(keyUser.getUser_id(), rsa.getPublicKey(), date, new Date(2999, 12, 30), "ON"));
+            keyUserDAO.insert(new KeyUser(keyUser.getUser_id(), rsa.getPublicKey(), reportTimestamp,  Timestamp.valueOf("2038-01-19 03:14:07"), "ON"));
             //gui mail
             String emailSubject = "Thong bao cap nhat khoa bao mat!";
             String emailBody = "Hellooo,\n\n" +
