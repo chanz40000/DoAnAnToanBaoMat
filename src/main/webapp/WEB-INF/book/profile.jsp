@@ -207,19 +207,60 @@
 												<div class="col-md-6">
 													<label style="font-size: 22px" class="small mb-1">Sinh nhật: ${userC.birthday}</label>
 												</div>
-												<div class="col-md-6">
-													<label style="font-size: 22px" class="small mb-1">Upload Key</label>
-													<button class="btn btn-primary" data-toggle="modal" data-target="#keyModal">
-														Lộ khóa
-													</button>
-												</div>
+
 											</div>
 
 										</form>
+
+										<div>
+											<label style="font-size: 22px" class="small mb-1">Upload Key</label>
+											<button class="btn btn-warning" data-toggle="modal" data-target="#keyModal">Upload</button>
+
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="keyModalLabel" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="keyModalLabel">Nhập khóa hoặc tải lên từ tệp</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<c:if test="${not empty message}">
+											<div class="alert ${message.contains('thành công') ? 'alert-success' : 'alert-danger'}">
+													${message}
+											</div>
+										</c:if>
+
+										<div class="modal-body">
+
+											<form id="keyForm2" method="post" action="UploadKeyServlet">
+												<div class="form-group">
+													<label for="password">Nhập pass của bạn:</label>
+													<input type="password" name="password" id="password" placeholder="Mật khẩu"/>
+												</div>
+												<div class="form-group">
+													<label for="inputKey">Nhập khóa của bạn:</label>
+													<textarea class="form-control" name="keyContent" id="inputKey" rows="4" placeholder="Nhập khóa tại đây"></textarea>
+												</div>
+												<div class="form-group mt-3">
+													<label for="uploadFile">Hoặc tải khóa từ tệp:</label>
+													<input type="file" class="form-control-file"  id="uploadFile" accept=".txt" />
+												</div>
+												<button type="button" class="btn btn-primary mt-3" id="loadFileButton">Tải tệp</button>
+												<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>
+											</form>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
+
+
+
 
 						<!-- Liệt kê các khóa xác thực -->
 						<div class="row mt-4">
@@ -270,36 +311,6 @@
 								</div>
 							</div>
 						</div>
-						<!-- Modal for entering and uploading the key -->
-						<div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="keyModalLabel" aria-hidden="true">
-							<div class="modal-dialog">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="keyModalLabel">Nhập khóa hoặc tải lên từ tệp</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<c:if test="${not empty message}">
-										<div class="alert ${message.contains('thành công') ? 'alert-success' : 'alert-danger'}">
-												${message}
-										</div>
-									</c:if>
-
-									<div class="modal-body">
-
-										<form id="keyForm2" method="post" action="CreateKeyServlet">
-											<div class="form-group">
-												<label for="passwordlo">Nhập pass của bạn:</label>
-												<input type="password" name="password" id="passwordlo" placeholder="Mật khẩu"/>
-											</div>
-											<button type="submit" class="btn btn-success mt-3">Xác nhận tạo khóa mới</button>
-										</form>
-									</div>
-								</div>
-							</div>
-						</div>
-
 
 					</div>
 				</div>
@@ -366,6 +377,8 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 
 
 </body>
