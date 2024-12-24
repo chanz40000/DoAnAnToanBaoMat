@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Random;
 
 import static util.Email.sendEmailWithAttachment;
@@ -39,6 +40,10 @@ public class CreateKeyServlet extends HttpServlet {
         User user =(User) request.getSession().getAttribute("userC");
         String email = user.getEmail();
 
+        //lay ra timestap hien tai
+        KeyUserDAO keyUserDAO = new KeyUserDAO();
+        KeyUser keyUser = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
+        Timestamp timestamp = keyUser.getCreate_at();
 
         if (user != null) {
             HttpSession mySession = request.getSession();
@@ -59,6 +64,7 @@ public class CreateKeyServlet extends HttpServlet {
                 mySession.setAttribute("otpKey", otpvalue);
                 mySession.setAttribute("email", email);
                 request.setAttribute("message", "Mã OTP đã được gửi tới email của bạn!");
+                request.setAttribute("timestamp", timestamp);
                 String url = request.getContextPath() + "/WEB-INF/book/enterOtpKey.jsp";
                 RequestDispatcher dispatcher = request.getRequestDispatcher(url);
                 dispatcher.forward(request, response);

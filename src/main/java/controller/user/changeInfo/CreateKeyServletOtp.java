@@ -39,38 +39,56 @@ public class CreateKeyServletOtp extends HttpServlet {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
         KeyUser keyUser = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
         System.out.println("keyUser: "+ keyUser.toString());
-        //lay ra public key
-        String publicKey = keyUser.getKey();
 
 
-        //lay ra private key
-
-//        System.out.println("privateKey: "+ privateKey);
-//        System.out.println("publickey: "+publicKey);
-//        //kiem tra xem key co khop nhau khong
-//        RSA rsa = new RSA();
-//        boolean isCreated = rsa.validateRSAKeys(publicKey, privateKey);
+        String mess="";
 
 
+        // Lấy giá trị thời gian từ form
+
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = now.format(formatter);
+        Timestamp noww = Timestamp.valueOf(formattedDate);
+
+        String timeString = request.getParameter("time");
+        Timestamp timestamp;
+        if (timeString != null && !timeString.isEmpty()) {
+            // Chuyển đổi sang kiểu dữ liệu Timestamp
+            timestamp= Timestamp.valueOf(timeString.replace("T", " ") + ":00");
+
+        } else {
+            timestamp=noww;
+        }
+
+        //kiểm tra xem thoi gian hop le khong
+        Timestamp create_At = keyUser.getCreate_at();
+
+        boolean check_time =isTimestampInRange(timestamp, create_At, noww);
+        if(!check_time){
+            mess+="Thời gian lộ key không hợp lệ. ";
+        }
+
+        //kiem tra otp
         HttpSession session = request.getSession();
         int value = Integer.parseInt(request.getParameter("otpKey"));
         int otp = (int) session.getAttribute("otpKey");
-        boolean isCreated;
-//        String password = request.getParameter("password");
-//        password = PasswordEncryption.toSHA1(password);
+        boolean check_Otp;
 
         if(value==otp){
-            isCreated = true;
+            check_Otp = true;
         }else{
-            isCreated = false;
+            mess+="OTP không hợp lệ . ";
+            check_Otp = false;
         }
 
-        if (isCreated) {
-            this.updatekeyy(keyUser);
+        if (check_Otp && check_time) {
+            this.updatekeyy(keyUser, timestamp);
             request.setAttribute("message", "Khóa mới đã được tạo thành công!");
             request.setAttribute("type", "success");
         } else {
-                request.setAttribute("message", "Sai mã OTP");
+                request.setAttribute("message", mess);
                 ErrorBean eb = new ErrorBean();
                 eb.setError((String) request.getAttribute("message"));
                 request.setAttribute("errorBean", eb);
@@ -79,9 +97,7 @@ public class CreateKeyServletOtp extends HttpServlet {
                 RequestDispatcher dispatcher = request.getRequestDispatcher(url);
                 dispatcher.forward(request, response);
                 return;
-//            request.setAttribute("errorBean", "Tạo mới khóa thất bại. Vui lòng thử lại!");
-//            request.setAttribute("message", "Mật khẩu sai. Vui lòng thử lại!");
-//            request.setAttribute("type", "error");
+
         }
 
 //         Forward response back to the JSP
@@ -89,12 +105,14 @@ public class CreateKeyServletOtp extends HttpServlet {
 
     }
 
-    public boolean updatekeyy(KeyUser keyUser) {
+    public boolean isTimestampInRange(Timestamp target, Timestamp start, Timestamp end) {
+        if (target == null || start == null || end == null) {
+            throw new IllegalArgumentException("Các giá trị timestamp không được null.");
+        }
+        return !target.before(start) && !target.after(end);
+    }
+    public boolean updatekeyy(KeyUser keyUser, Timestamp reportTimestamp) {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = now.format(formatter);
-        Timestamp reportTimestamp = Timestamp.valueOf(formattedDate);
         //DOI NGAY het han
         keyUser.setExpired_at(reportTimestamp);
         //doi status
@@ -102,10 +120,15 @@ public class CreateKeyServletOtp extends HttpServlet {
         //CAP NHAT VAO DATABASE
         keyUserDAO.update(keyUser);
 
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = now.format(formatter);
+        Timestamp noww = Timestamp.valueOf(formattedDate);
         //Them moi mot Key khac cho user
         RSA rsa = new RSA();
         try {
-            keyUserDAO.insert(new KeyUser(keyUser.getUser_id(), rsa.getPublicKey(), reportTimestamp,  Timestamp.valueOf("2038-01-19 03:14:07"), "ON"));
+            keyUserDAO.insert(new KeyUser(keyUser.getUser_id(), rsa.getPublicKey(), noww,  Timestamp.valueOf("2038-01-19 03:14:07"), "ON"));
             //gui mail
             String emailSubject = "Thong bao cap nhat khoa bao mat!";
             String emailBody = "Hellooo,\n\n" +
@@ -121,4 +144,5 @@ public class CreateKeyServletOtp extends HttpServlet {
         }
 
     }
+
 }

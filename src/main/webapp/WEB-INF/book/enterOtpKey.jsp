@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Forget password</title>
+    <title>Change Key</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="css/styleforlogin.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -48,6 +48,9 @@
                         <label for="keyReport"><i class="fa fa-envelope"></i></label>
                         <input type="text" name="otpKey" id="keyReport"  placeholder="Mã OTP" required/>
                     </div>
+
+                    <input type="datetime-local" id="time" name="time" required>
+
                     <input type="submit" name="" id="signin" class="form-submit" value="Cấp lại key"/>
                     <button onclick="event.preventDefault(); window.location.href='./Profile';" class="btn btn-success">
                         Quay lại
@@ -75,6 +78,57 @@
         }, 4000);
     }
 </script>
+<script>
+    // Giả sử bạn nhận được timestamp từ request như thế này
+    const timestampFromRequest = "<%= request.getAttribute("timestamp") %>";
+
+    window.onload = function() {
+        if (timestampFromRequest) {
+            // Dùng timestampFromRequest trực tiếp
+            var startTimestamp = parseInt(timestampFromRequest); // Timestamp từ request
+            var currentTimestamp = Date.now(); // Timestamp hiện tại
+
+            // Thiết lập min và max cho ô chọn ngày giờ (sử dụng timestamp)
+            var timestampPicker = document.getElementById('selectedDate');
+            timestampPicker.min = new Date(startTimestamp).toISOString().slice(0, 16); // Convert to ISO and trim to datetime-local format
+            timestampPicker.max = new Date(currentTimestamp).toISOString().slice(0, 16); // Convert to ISO and trim to datetime-local format
+        }
+    };
+
+    // Kiểm tra khi người dùng chọn ngày giờ
+    function validateDate() {
+        // Lấy giá trị của ngày giờ người dùng chọn từ input
+        const selectedDate = document.getElementById("selectedDate").value;
+
+        if (!selectedDate) {
+            return false;  // Nếu không chọn ngày thì không tiếp tục
+        }
+
+        const selectedTimestamp = new Date(selectedDate).getTime();  // Chuyển đổi thành timestamp
+
+        // Kiểm tra nếu ngày giờ người dùng chọn không nằm trong khoảng
+        if (selectedTimestamp < startTimestamp || selectedTimestamp > currentTimestamp) {
+            // Hiển thị thông báo lỗi nếu ngày không hợp lệ
+            document.getElementById('error-message').style.display = 'block';
+            return false; // Ngừng form gửi đi
+        }
+
+        // Ẩn thông báo lỗi nếu ngày hợp lệ
+        document.getElementById('error-message').style.display = 'none';
+        return true; // Cho phép form gửi đi
+    }
+    // Gán sự kiện kiểm tra khi form được gửi
+    document.getElementById("signin").addEventListener("click", function(event) {
+        if (!validateDate()) {
+            event.preventDefault();  // Ngừng gửi form nếu ngày không hợp lệ
+        }
+    });
+    console.log("startTimestamp:", startTimestamp);
+    console.log("currentTimestamp:", currentTimestamp);
+    console.log("selectedTimestamp:", selectedTimestamp);
+
+</script>
+
 <script src="/js/jquery.min.login.js"></script>
 </body>
 </html>
