@@ -207,6 +207,12 @@
 												<div class="col-md-6">
 													<label style="font-size: 22px" class="small mb-1">Sinh nhật: ${userC.birthday}</label>
 												</div>
+												<div class="col-md-6">
+													<label style="font-size: 22px" class="small mb-1">Upload Key</label>
+													<button class="btn btn-primary" data-toggle="modal" data-target="#keyModal">
+														Lộ khóa
+													</button>
+												</div>
 											</div>
 
 										</form>
@@ -240,15 +246,20 @@
 											<c:forEach var="key" items="${keyUserDAO.selectByUser(id)}">
 												<tr>
 													<td>Khóa ${counter}</td>
-													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy" /></td>
-													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy" /></td>
+													<td><fmt:formatDate value="${key.getCreate_at()}" pattern="dd-MM-yyyy HH:mm:ss"/></td>
+													<td><fmt:formatDate value="${key.getExpired_at()}" pattern="dd-MM-yyyy HH:mm:ss" /></td>
 													<td>${key.getStatus()}</td> <!-- Hiển thị trạng thái -->
 													<td>
-														<button
-																class="btn ${key.getStatus() == 'ON' ? 'btn-warning' : 'btn-secondary'} " data-toggle="modal" data-target="#keyModal"
-															${key.getStatus() == 'ON' ? '' : 'disabled'}>
-															Lộ khóa
-														</button>
+														<form id="keyForm" method="post" action="CreateKeyServlet">
+															<button
+																	class="btn ${key.getStatus() == 'ON' ? 'btn-warning' : 'btn-secondary'}"
+																${key.getStatus() == 'ON' ? 'type="submit"' : ''}
+																${key.getStatus() == 'ON' ? '' : 'disabled'}>
+																Lộ khóa
+															</button>
+
+														</form>
+
 													</td>
 												</tr>
 												<c:set var="counter" value="${counter + 1}" /> <!-- Tăng biến đếm -->
@@ -277,7 +288,7 @@
 
 									<div class="modal-body">
 
-										<form id="keyForm" method="post" action="CreateKeyServlet">
+										<form id="keyForm2" method="post" action="CreateKeyServlet">
 											<div class="form-group">
 												<label for="passwordlo">Nhập pass của bạn:</label>
 												<input type="password" name="password" id="passwordlo" placeholder="Mật khẩu"/>
