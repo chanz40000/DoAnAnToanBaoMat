@@ -62,7 +62,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -108,7 +110,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
 
                 User u = new UserDAO().selectById(idUser);
@@ -259,7 +263,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -321,7 +327,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -369,7 +377,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -419,7 +429,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -467,7 +479,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 3) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
@@ -527,7 +541,9 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -554,7 +570,6 @@ public class OrderDAO extends AbsDAO<Order>{
             // Tính toán serialized_data
             String serializedData = getSerializedDataForOrder(orderId); // Giả sử hàm này có hiệu quả
             String calculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
-            System.out.println("Hash tính được: " + calculatedHash);
 
             // Truy vấn để lấy chữ ký và khóa công khai
             String sql = " SELECT os.signature, ku.public_key FROM order_signatures os LEFT JOIN key_user ku ON ku.user_id = ? AND ku.status = 'ON' WHERE os.order_id = ? ";
@@ -572,27 +587,26 @@ public class OrderDAO extends AbsDAO<Order>{
                         if (signature == null) {
                             // Nếu hash đúng trở lại, trạng thái = 1
                             if (isHashCorrect(serializedData, calculatedHash)) {
-                                updateOrderStatus(con, orderId, 1);
+                                updateOrderStatusSignature(con, orderId, 1);
                                 return 1;
                             } else {
                                 // Hash không đúng -> trạng thái = 2
-                                updateOrderStatus(con, orderId, 2);
+                                updateOrderStatusSignature(con, orderId, 2);
                                 return 2;
                             }
                         }
 
                         // Nếu có chữ ký, giải mã hash từ chữ ký
                         String decryptedHash = RSA.decryptHash(publicKey, signature);
-                        System.out.println("Hash giải mã: " + decryptedHash);
 
                         // So sánh hash đã tính và hash giải mã
                         if (calculatedHash.equals(decryptedHash)) {
                             // Hash khớp -> trạng thái = 3
-                            updateOrderStatus(con, orderId, 3);
+                            updateOrderStatusSignature(con, orderId, 3);
                             return 3;
                         } else {
                             // Hash không khớp -> trạng thái = 2
-                            updateOrderStatus(con, orderId, 2);
+                            updateOrderStatusSignature(con, orderId, 2);
                             return 2;
                         }
                     }
@@ -601,7 +615,7 @@ public class OrderDAO extends AbsDAO<Order>{
         } catch (Exception e) {
             e.printStackTrace();
             // Nếu có lỗi, coi là trạng thái không hợp lệ
-            updateOrderStatus(con, orderId, 2);
+            updateOrderStatusSignature(con, orderId, 2);
             return 2;
         }
 
@@ -632,7 +646,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 try (ResultSet checkExistRs = checkExistSt.executeQuery()) {
                     if (checkExistRs.next() && checkExistRs.getInt("count") == 0) {
                         // Không có bản ghi chữ ký -> cập nhật trạng thái về 2
-                        updateOrderStatus(con, orderId, 2);
+                        updateOrderStatusSignature(con, orderId, 2);
                         return 2;
                     }
                 }
@@ -646,7 +660,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     while (checkRs.next()) {
                         if (!checkRs.getBoolean("is_signature_verified")) {
                             // Có ít nhất một chữ ký chưa xác minh -> cập nhật trạng thái về 2
-                            updateOrderStatus(con, orderId, 2);
+                            updateOrderStatusSignature(con, orderId, 2);
                             return 2;
                         }
                     }
@@ -673,7 +687,7 @@ public class OrderDAO extends AbsDAO<Order>{
 
                     if (hasSignatures && allSignaturesVerified) {
                         // Tất cả chữ ký đã được xác minh -> trạng thái đã bị chỉnh sửa
-                        updateOrderStatus(con, orderId, 2);
+                        updateOrderStatusSignature(con, orderId, 2);
                         return 2;
                     }
                 }
@@ -753,7 +767,7 @@ public class OrderDAO extends AbsDAO<Order>{
 
 
     // Hàm tiện ích để cập nhật trạng thái đơn hàng
-    private void updateOrderStatus(Connection con, int orderId, int newStatus) throws SQLException {
+    private void updateOrderStatusSignature(Connection con, int orderId, int newStatus) throws SQLException {
         String updateSql = "UPDATE orders SET signature_status_id = ? WHERE order_id = ?";
         try (PreparedStatement updateSt = con.prepareStatement(updateSql)) {
             updateSt.setInt(1, newStatus);
@@ -761,6 +775,16 @@ public class OrderDAO extends AbsDAO<Order>{
             updateSt.executeUpdate();
         }
     }
+    //     Hàm tiện ích để cập nhật trạng thái đơn hàng
+    private void updateOrderStatus(Connection con, int orderId, int newStatus) throws SQLException {
+        String updateSql = "UPDATE orders SET status_id = ? WHERE order_id = ?";
+        try (PreparedStatement updateSt = con.prepareStatement(updateSql)) {
+            updateSt.setInt(1, newStatus);
+            updateSt.setInt(2, orderId);
+            updateSt.executeUpdate();
+        }
+    }
+
 
 
     public List<Order> selectByUserIdAndStatusSignatureIds(int userId, int... statusSignatureIds) {
@@ -1148,8 +1172,8 @@ public class OrderDAO extends AbsDAO<Order>{
 //            System.out.println(rs[i]);
 //        }
         UserDAO userDAO = new UserDAO();
-        User user = userDAO.selectById(4);
-        String hash = Hash.calculateHash(orderDAO.getSerializedDataForOrder(2).toString().getBytes(StandardCharsets.UTF_8));
+        User user = userDAO.selectById(5);
+        String hash = Hash.calculateHash(orderDAO.getSerializedDataForOrder(1).toString().getBytes(StandardCharsets.UTF_8));
         System.out.println(hash);
         // lay public key giai ma chu ky
         KeyUserDAO keyUserDAO = new KeyUserDAO();
