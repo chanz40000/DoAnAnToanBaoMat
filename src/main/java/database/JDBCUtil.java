@@ -14,7 +14,7 @@ public class JDBCUtil {
 
             String url = "jdbc:mysql://localhost:3306/book";
             String username = "root";
-            String password = "123456";
+            String password = "13122003";
 
             c = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
