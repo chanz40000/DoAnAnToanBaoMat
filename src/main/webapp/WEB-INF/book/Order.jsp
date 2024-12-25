@@ -327,7 +327,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -436,7 +436,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -529,7 +529,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -651,7 +651,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -739,7 +739,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -841,7 +841,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -905,7 +905,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>

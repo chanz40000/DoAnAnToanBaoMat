@@ -62,7 +62,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();
@@ -110,7 +110,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
 
@@ -263,7 +263,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();
@@ -327,7 +327,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();
@@ -377,7 +377,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature ==2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();
@@ -429,7 +429,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();
@@ -479,7 +479,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
                 statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
-                if (status == 3 && statusSignature == 3) {
+                if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
                 updateOrdersBasedOnKeyStatus();

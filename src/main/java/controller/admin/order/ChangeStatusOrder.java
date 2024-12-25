@@ -78,12 +78,14 @@ public class ChangeStatusOrder extends HttpServlet {
             orderDAO.updateStatusOrder(orderId, giaoThanhCong);
             Order order = orderDAO.selectById(orderId);
             order.setStatus(giaoThanhCong);
-        }, 5, TimeUnit.MINUTES);
+        }, 25, TimeUnit.MINUTES);
     }
     private void scheduleAllPendingOrders() {
         List<Order> orders = orderDAO.selectOrderByStatus(3);
         for (Order order : orders) {
-            scheduleStatusUpdate(order.getOrderId());
+            if (order.getStatus().getStatusId() == 3){
+                scheduleStatusUpdate(order.getOrderId());
+            }
         }
     }
 

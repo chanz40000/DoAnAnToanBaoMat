@@ -165,6 +165,32 @@
     .card{
         width: 100%;
     }
+    .status-yellow {
+        background-color: #ffc107; /* Màu vàng */
+        color: white;
+        padding: 5px 5px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .status-red {
+        background-color: #dc3545; /* Màu đỏ */
+        color: white;
+        padding: 5px 5px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .status-green {
+        background-color: #28a745; /* Màu xanh lá cây */
+        color: white;
+        padding: 5px 5px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
 
 </style>
 <body>
@@ -188,20 +214,31 @@
 
                 <div class="container-xxl flex-grow-1 container-p-y" id="content-big-section">
                     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Đơn hàng /</span> Danh sách đơn hàng</h4>
-
-
-
-
                     <!-- Basic Bootstrap Table -->
                     <div class="card">
                         <jsp:useBean id="orderDAO" class="database.OrderDAO"/>
                         <div class="col-xl-12">
                             <div class="nav-align-top mb-4">
                                 <ul class="nav nav-tabs nav-fill" role="tablist">
+
                                     <li class="nav-item">
                                         <button
                                                 type="button"
                                                 class="nav-link active"
+                                                role="tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#navs-xacthucchuky"
+                                                aria-controls="navs-xacthucchuky"
+                                                aria-selected="true"
+                                        >
+                                            <i class="tf-icons bx bx-home"></i> Xác thực chữ ký
+                                        </button>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <button
+                                                type="button"
+                                                class="nav-link"
                                                 role="tab"
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#navs-justified-home"
@@ -209,7 +246,6 @@
                                                 aria-selected="true"
                                         >
                                             <i class="tf-icons bx bx-home"></i> Cần xác nhận
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-danger">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -223,7 +259,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-box"></i> Đóng gói
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-danger">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -237,7 +272,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-truck"></i> Đang giao
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-danger">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -251,7 +285,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-check-circle"></i> Giao thành công
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-success">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -265,7 +298,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-refresh"></i> Yêu cầu hủy
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-info">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -279,7 +311,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-x-circle"></i> Đã hủy
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-warning">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -293,7 +324,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-x-circle"></i> Yêu cầu hoàn
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-warning">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -307,7 +337,6 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-x-circle"></i> Đã hoàn
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-warning">3</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
@@ -321,14 +350,44 @@
                                                 aria-selected="false"
                                         >
                                             <i class="tf-icons bx bx-x-circle"></i> Thành công
-                                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-warning">3</span>
                                         </button>
                                     </li>
                                 </ul>
 
                                 <!-- Tab content -->
                                 <div class="tab-content">
-                                    <div class="tab-pane fade show active" id="navs-justified-home" role="tabpanel" aria-labelledby="navs-justified-home-tab">
+                                    <div class="tab-pane fade show active" id="navs-xacthucchuky" role="tabpanel" aria-labelledby="navs-xacthucchuky-tab">
+                                        <h5 class="card-header">Danh sách đơn hàng cần xác thực chữ ký  </h5>
+                                        <div class="table-responsive text-nowrap">
+                                            <table id="example11" class="table table-striped" style="width:100%">
+                                                <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Mã User</th>
+                                                    <th>Ngày đặt</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Trạng thái chữ ký</th>
+                                                    <th></th>
+                                                    <th></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Mã User</th>
+                                                    <th>Ngày đặt</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Trạng thái chữ ký</th>
+                                                    <th></th>
+                                                    <th></th>
+                                                </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="navs-justified-home" role="tabpanel" aria-labelledby="navs-justified-home-tab">
                                         <h5 class="card-header">Danh sách đơn hàng giao thành công  </h5>
                                         <div class="table-responsive text-nowrap">
                                             <table id="example1" class="table table-striped" style="width:100%">
@@ -338,6 +397,7 @@
                                                     <th>Mã User</th>
                                                     <th>Ngày đặt</th>
                                                     <th>Trạng thái</th>
+                                                    <th>Trạng thái chữ ký</th>
                                                     <th>Actions</th>
                                                     <th></th>
                                                 </tr>
@@ -350,6 +410,7 @@
                                                     <th>Mã User</th>
                                                     <th>Ngày đặt</th>
                                                     <th>Trạng thái</th>
+                                                    <th>Trạng thái chữ ký</th>
                                                     <th>Actions</th>
                                                     <th></th>
                                                 </tr>
@@ -365,6 +426,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -377,6 +439,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -391,6 +454,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
@@ -402,6 +466,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </tfoot>
@@ -415,6 +480,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
@@ -426,6 +492,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </tfoot>
@@ -439,6 +506,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -451,6 +519,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -465,6 +534,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
@@ -476,6 +546,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </tfoot>
@@ -489,6 +560,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -501,6 +573,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th>Actions</th>
                                                 <th></th>
                                             </tr>
@@ -515,6 +588,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
@@ -526,6 +600,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </tfoot>
@@ -539,6 +614,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
@@ -550,6 +626,7 @@
                                                 <th>Mã User</th>
                                                 <th>Ngày đặt</th>
                                                 <th>Trạng thái</th>
+                                                <th>Trạng thái chữ ký</th>
                                                 <th></th>
                                             </tr>
                                             </tfoot>
@@ -647,6 +724,7 @@
 <script>
     $(document).ready(function() {
         const tables = [
+            { id: '#example11', status: 11 },
             { id: '#example1', status: 1 },
             { id: '#example2', status: 2 },
             { id: '#example3', status: 3 },
@@ -684,17 +762,48 @@
                         }
                     },
                     {
+                        "data": "statusSignature.statusSignatureName", // Hiển thị trạng thái chữ ký
+                        "render": function (data, type, row) {
+                            let statusClass = ''; // Khởi tạo biến lớp CSS
+
+                            // Xác định lớp CSS dựa trên giá trị của statusSignatureId
+                            switch (row.statusSignature.statusSignatureId) {
+                                case 1:
+                                    statusClass = 'status-yellow'; // Màu vàng
+                                    break;
+                                case 2:
+                                    statusClass = 'status-red'; // Màu đỏ
+                                    break;
+                                case 3:
+                                    statusClass = 'status-green'; // Màu xanh lá cây
+                                    break;
+                                default:
+                                    statusClass = ''; // Nếu không có giá trị khớp thì không thêm lớp
+                            }
+
+                            // Trả về div với lớp CSS thích hợp
+                            return '<div class="' + statusClass + '">' + data + '</div>';
+                        }
+                    },
+                    {
                         "data": "orderId",
                         "render": function(data, type, row) {
                             let buttons = '';
+
+                            // Kiểm tra nếu statusSignatureId của đơn hàng là 2, không hiển thị nút
+                            if (row.statusSignature.statusSignatureId === 2) {
+                                return buttons; // Trả về không có nút bấm nào
+                            }
+
+                            // Kiểm tra trạng thái hiện tại của đơn hàng
                             if ([1, 5, 7].includes(table.status)) {
                                 buttons = '<button type="button" class="btn btn-primary" onclick="confirmOrder(' + data + ', ' + row.status.statusId + ')">Chấp nhận</button>' +
                                     '<button type="button" class="btn btn-danger" onclick="rejectOrder(' + data + ', ' + row.status.statusId + ')">Từ chối</button>';
                             } else if (table.status === 2) {
                                 buttons = '<button type="button" class="btn btn-success" onclick="confirmOrder(' + data + ', ' + row.status.statusId + ')">Đóng gói xong</button>';
                             }
-                            return buttons;
 
+                            return buttons; // Trả về các nút bấm nếu không có trạng thái "statusSignatureId === 2"
                         }
                     },
                     {
@@ -756,6 +865,7 @@
         });
     }
     function reloadAllTables() {
+        $('#example11').DataTable().ajax.reload();
         $('#example1').DataTable().ajax.reload();
         $('#example2').DataTable().ajax.reload();
         $('#example3').DataTable().ajax.reload();
