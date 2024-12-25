@@ -29,8 +29,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             while (rs.next()) {
                 int user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
-                Date create_at = rs.getDate("create_at");
-                Date expired_at = rs.getDate("expired_at");
+                Timestamp create_at = rs.getTimestamp("create_at");
+                Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
 
@@ -66,8 +66,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             while (rs.next()) {
                  user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
-                Date create_at = rs.getDate("create_at");
-                Date expired_at = rs.getDate("expired_at");
+                Timestamp create_at = rs.getTimestamp("create_at");
+                Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
 
@@ -104,8 +104,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             if (rs.next()) {
                 int user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
-                Date create_at = rs.getDate("create_at");
-                Date expired_at = rs.getDate("expired_at");
+                Timestamp create_at = rs.getTimestamp("create_at");
+                Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
 
@@ -139,8 +139,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             if (rs.next()) {
                 int user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
-                Date create_at = rs.getDate("create_at");
-                Date expired_at = rs.getDate("expired_at");
+                Timestamp create_at = rs.getTimestamp("create_at");
+                Timestamp expired_at = rs.getTimestamp("expired_at");
                  status = rs.getString("status");
 
 
@@ -166,8 +166,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, keyUser.getUser_id().getUserId());
             ps.setString(2, keyUser.getKey());
-            ps.setDate(3, keyUser.getCreate_at());
-            ps.setDate(4, keyUser.getExpired_at());
+            ps.setTimestamp(3, keyUser.getCreate_at());
+            ps.setTimestamp(4, keyUser.getExpired_at());
             ps.setString(5, keyUser.getStatus());
             result = ps.executeUpdate();
             JDBCUtil.closeConnection(con);
@@ -219,8 +219,8 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             String sql = "UPDATE key_user SET public_key=?, create_at=?, expired_at=?, status=? WHERE user_id=? AND status='ON'";
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, keyUser.getKey());
-            ps.setDate(2, keyUser.getCreate_at());
-            ps.setDate(3, keyUser.getExpired_at());
+            ps.setTimestamp(2, keyUser.getCreate_at());
+            ps.setTimestamp(3, keyUser.getExpired_at());
             ps.setString(4, keyUser.getStatus());
             ps.setInt(5, keyUser.getUser_id().getUserId());
             result = ps.executeUpdate();

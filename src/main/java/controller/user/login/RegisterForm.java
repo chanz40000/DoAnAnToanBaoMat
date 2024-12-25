@@ -16,7 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,7 +106,14 @@ public class RegisterForm extends HttpServlet {
                 String privateKey = rsa.getPrivateKey();
 
                 KeyUserDAO keyUserDAO = new KeyUserDAO();
-                keyUserDAO.insert(new KeyUser(customer, publicKey, new Date(System.currentTimeMillis()), new Date(2999, 12, 30), "ON"));
+
+                LocalDateTime now = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedDate = now.format(formatter);
+                Timestamp reportTimestamp = Timestamp.valueOf(formattedDate);
+                Timestamp maxTimestamp =  Timestamp.valueOf("2038-01-19 03:14:07");
+
+                keyUserDAO.insert(new KeyUser(customer, publicKey, reportTimestamp, maxTimestamp, "ON"));
                 String emailSubject = "Thong bao dang ky tai khoan thanh cong!";
                 String emailBody = "Hellooo,\n\n" +
                         "Chuc mung ban da tro thanh khach hang than thiet cua chung toi! \n\n" +

@@ -63,7 +63,19 @@ public class VerifySignature extends HttpServlet {
 
         try {
 
+            // Kiểm tra trạng thái chữ ký của đơn hàng
+            if (order.getStatusSignature().getStatusSignatureId() == 2) {
+                String errorMessage = "Đơn hàng của bạn đã bị thay đổi! Không thể xác nhận đơn hàng.";
+                request.setAttribute("Error", errorMessage);
+                eb.setError(errorMessage);
+                request.setAttribute("errorBean", eb);
 
+                // Forward lại trang verify-order.jsp cùng thông báo lỗi
+                String url = "/WEB-INF/book/verify-order.jsp";
+                RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                dispatcher.forward(request, response);
+                return;
+            }
 
             KeyUserDAO keyUserDAO = new KeyUserDAO();
             KeyUser userKey = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
@@ -131,9 +143,7 @@ public class VerifySignature extends HttpServlet {
                     orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
                     orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
 
-//                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
-//                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
-                    String url = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+                   String url = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
 
                     RequestDispatcher dispatcher = request.getRequestDispatcher(url);
                     dispatcher.forward(request, response);
@@ -144,9 +154,7 @@ public class VerifySignature extends HttpServlet {
                     StatusOrder statusOrder = new StatusOrder(1);
                     orderDAO.updateStatusOrder(order.getOrderId(), statusOrder);
                     orderDAO.updateStatusSignatureOrder(order.getOrderId(), statusSignature);
-//                orderSignatureDAO.updateVerifySignatureByOrderId(order.getOrderId(), isVerify);
-//                orderSignatureDAO.updateSignatureAndStatusByOrderId(order.getOrderId(), signature);
-                    String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
+                   String redirectUrl = request.getContextPath() + "/OrderDetail?OrderId=" + order.getOrderId();
                     response.sendRedirect(redirectUrl);
                 }
             }
