@@ -53,6 +53,7 @@ public class CreateKeyServletOtp extends HttpServlet {
         Timestamp noww = Timestamp.valueOf(formattedDate);
 
         String timeString = request.getParameter("time");
+        System.out.println("time String: "+ timeString);
         Timestamp timestamp;
         if (timeString != null && !timeString.isEmpty()) {
             // Chuyển đổi sang kiểu dữ liệu Timestamp
