@@ -816,8 +816,22 @@ CREATE TABLE orderdetails (
   CONSTRAINT orderdetails_ibfk_1 FOREIGN KEY (order_id) REFERENCES orders (order_id),
   CONSTRAINT orderdetails_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (product_id)
 );
-
-
+ALTER TABLE order_signatures ADD COLUMN is_signature_verified BOOLEAN DEFAULT FALSE;
+drop table order_signatures;
+CREATE TABLE order_signatures (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    signature TEXT NULL,
+    is_signature_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+ALTER TABLE book.`key_user` 
+CHANGE COLUMN create_at
+create_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ,
+CHANGE COLUMN expired_at
+expired_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ;
 
 
 
