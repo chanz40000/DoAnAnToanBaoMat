@@ -15,29 +15,23 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
     public ArrayList<KeyUser> selectAll() {
         ArrayList<KeyUser> keyUserArrayList = new ArrayList<>();
         try {
-            // tao mot connection
             Connection con = JDBCUtil.getConnection();
-
-            // tao cau lenh sql
             String sql = "SELECT * FROM key_user";
-
             PreparedStatement st = con.prepareStatement(sql);
-
-            // thuc thi
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
+                int id = rs.getInt("id");
                 int user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
                 Timestamp create_at = rs.getTimestamp("create_at");
                 Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
-
                 UserDAO userDAO = new UserDAO();
                 User user = userDAO.selectById(user_id);
 
-                KeyUser keyUser = new KeyUser(user, key, create_at, expired_at, status);
+                KeyUser keyUser = new KeyUser(id, user, key, create_at, expired_at, status); // Thêm id vào constructor
                 keyUserArrayList.add(keyUser);
             }
 
@@ -49,42 +43,37 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
         return keyUserArrayList;
     }
 
+
     public ArrayList<KeyUser> selectByUser(int user_id) {
         ArrayList<KeyUser> keyUserArrayList = new ArrayList<>();
         try {
-            // tao mot connection
             Connection con = JDBCUtil.getConnection();
-
-            // tao cau lenh sql
-            String sql = "SELECT * FROM key_user WHERE  user_id=?";
-
+            String sql = "SELECT * FROM key_user WHERE user_id = ?";
             PreparedStatement st = con.prepareStatement(sql);
             st.setInt(1, user_id);
-            // thuc thi
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                 user_id = rs.getInt("user_id");
+                int id = rs.getInt("id");
                 String key = rs.getString("public_key");
                 Timestamp create_at = rs.getTimestamp("create_at");
                 Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
-
                 UserDAO userDAO = new UserDAO();
                 User user = userDAO.selectById(user_id);
 
-                KeyUser keyUser = new KeyUser(user, key, create_at, expired_at, status);
+                KeyUser keyUser = new KeyUser(id, user, key, create_at, expired_at, status); // Thêm id vào constructor
                 keyUserArrayList.add(keyUser);
             }
 
             JDBCUtil.closeConnection(con);
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return keyUserArrayList;
     }
+
 
 
 
@@ -94,9 +83,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
 
         try {
             Connection con = JDBCUtil.getConnection();
-
-            String sql = "SELECT * FROM key_user WHERE user_id = ?";
-
+            String sql = "SELECT * FROM key_user WHERE id = ?";
             PreparedStatement st = con.prepareStatement(sql);
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -108,11 +95,10 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
                 Timestamp expired_at = rs.getTimestamp("expired_at");
                 String status = rs.getString("status");
 
-
                 UserDAO userDAO = new UserDAO();
                 User user = userDAO.selectById(user_id);
 
-                 keyUser = new KeyUser(user, key, create_at, expired_at, status);
+                keyUser = new KeyUser(id, user, key, create_at, expired_at, status); // Thêm id vào constructor
             }
             JDBCUtil.closeConnection(con);
         } catch (SQLException e) {
@@ -121,6 +107,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
 
         return keyUser;
     }
+
 
 
     public KeyUser selectByUserIdStatus(int id, String status) {
@@ -137,6 +124,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
             ResultSet rs = st.executeQuery();
 
             if (rs.next()) {
+                int idKey = rs.getInt("id");
                 int user_id = rs.getInt("user_id");
                 String key = rs.getString("public_key");
                 Timestamp create_at = rs.getTimestamp("create_at");
@@ -147,7 +135,7 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
                 UserDAO userDAO = new UserDAO();
                 User user = userDAO.selectById(user_id);
 
-                keyUser = new KeyUser(user, key, create_at, expired_at, status);
+                keyUser = new KeyUser(idKey, user, key, create_at, expired_at, status);
             }
             JDBCUtil.closeConnection(con);
         } catch (SQLException e) {
@@ -249,6 +237,13 @@ public class KeyUserDAO implements DAOInterface<KeyUser>{
 
     public static void main(String[] args) {
         KeyUserDAO keyUserDAO = new KeyUserDAO();
-        System.out.println(keyUserDAO.selectByUser(3).get(0).getCreate_at());
+//        System.out.println(keyUserDAO.selectByUser(3).get(0).getCreate_at());
+//
+        keyUserDAO.selectById(10);
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.selectById(2);
+        KeyUser userKey = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
+        System.out.println(userKey.toString());
+
     }
 }

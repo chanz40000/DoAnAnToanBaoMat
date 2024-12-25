@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class KeyUser {
+    int id;
     User user;
     String key;
     Timestamp create_at;
@@ -16,6 +17,22 @@ public class KeyUser {
         this.create_at = create_at;
         this.expired_at = expired_at;
         this.status = status;
+    }
+    public KeyUser(int id, User user, String key, Timestamp create_at, Timestamp expired_at, String status) {
+        this.id = id;
+        this.user = user;
+        this.key = key;
+        this.create_at = create_at;
+        this.expired_at = expired_at;
+        this.status = status;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public User getUser_id() {
@@ -56,5 +73,17 @@ public class KeyUser {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "KeyUser{" +
+                "id=" + id +
+                ", user=" + user +
+                ", key='" + key + '\'' +
+                ", create_at=" + create_at +
+                ", expired_at=" + expired_at +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

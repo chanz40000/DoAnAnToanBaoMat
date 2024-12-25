@@ -6,25 +6,60 @@ public class OrderSignature {
     private int id;
     private Order orderId;
     private String signature;
+    private String hashOrder;
     private boolean isSignatureVerified;
+    private KeyUser keyUser;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
     // Constructor
-    public OrderSignature(int id, Order orderId,  String signature,  Timestamp createdAt, Timestamp updatedAt,boolean isSignatureVerified) {
+//    public OrderSignature(int id, Order orderId,  String signature,  Timestamp createdAt, Timestamp updatedAt,boolean isSignatureVerified) {
+//        this.id = id;
+//        this.orderId = orderId;
+//        this.signature = signature;
+//        this.createdAt = createdAt;
+//        this.updatedAt = updatedAt;
+//        this.isSignatureVerified = isSignatureVerified;
+//    }
+
+    public OrderSignature(int id, Order orderId, String signature, String hashOrder, boolean isSignatureVerified, KeyUser keyUser, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.orderId = orderId;
         this.signature = signature;
+        this.hashOrder = hashOrder;
+        this.isSignatureVerified = isSignatureVerified;
+        this.keyUser = keyUser;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.isSignatureVerified = isSignatureVerified;
     }
 
-    public OrderSignature(Order orderId, String signature, boolean isSignatureVerified, Timestamp createdAt) {
+    public OrderSignature(Order orderId, String signature, boolean isSignatureVerified, KeyUser keyUser, Timestamp createdAt) {
         this.orderId = orderId;
         this.signature = signature;
         this.isSignatureVerified = isSignatureVerified;
+        this.keyUser = keyUser;
         this.createdAt = createdAt;
+    }
+
+    public OrderSignature(String hashOrder, Order orderId) {
+        this.hashOrder = hashOrder;
+        this.orderId = orderId;
+    }
+
+    public String getHashOrder() {
+        return hashOrder;
+    }
+
+    public void setHashOrder(String hashOrder) {
+        this.hashOrder = hashOrder;
+    }
+
+    public KeyUser getKeyUser() {
+        return keyUser;
+    }
+
+    public void setKeyUser(KeyUser keyUser) {
+        this.keyUser = keyUser;
     }
 
     public OrderSignature(Order orderId, String hash) {

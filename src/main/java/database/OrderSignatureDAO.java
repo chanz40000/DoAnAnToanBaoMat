@@ -36,15 +36,15 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 int id = rs.getInt("id");
                 int orderId = rs.getInt("order_id");
                 String signature = rs.getString("signature");
-
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
                 boolean isVerify = rs.getBoolean("is_signature_verified");
-
+                String hash = rs.getString("hash_order");
+                int idkeyuser = rs.getInt("key_user_id");
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
                 Order order = new OrderDAO().selectById(orderId);
-
-                OrderSignature orderSignature = new OrderSignature(id, order, signature, createdAt, updatedAt, isVerify);
+                KeyUser keyUser = new KeyUserDAO().selectById(idkeyuser);
+                OrderSignature orderSignature = new OrderSignature(id, order, signature, hash, isVerify, keyUser, createdAt, updatedAt);
                 orderSignatures.add(orderSignature);
             }
 
@@ -81,11 +81,14 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
                 boolean isVerify = rs.getBoolean("is_signature_verified");
+                String hash = rs.getString("hash_order");
+                int idkeyuser = rs.getInt("key_user_id");
 
+                KeyUser keyUser = new KeyUserDAO().selectById(idkeyuser);
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
                 Order order = new OrderDAO().selectById(orderId);
 
-                orderSignature = new OrderSignature(id, order, signature, createdAt, updatedAt, isVerify);
+                orderSignature = new OrderSignature(id, order, signature, hash, isVerify, keyUser, createdAt, updatedAt);
             }
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
@@ -121,11 +124,14 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
                 boolean isVerify = rs.getBoolean("is_signature_verified");
+                String hash = rs.getString("hash_order");
+                int idkeyuser = rs.getInt("key_user_id");
 
+                KeyUser keyUser = new KeyUserDAO().selectById(idkeyuser);
                 // Lấy thông tin Order và StatusOrder từ các bảng tương ứng
                 Order order = new OrderDAO().selectById(orderId);
 
-                orderSignature = new OrderSignature(id, order, signature, createdAt, updatedAt, isVerify);
+                orderSignature = new OrderSignature(id, order, signature, hash, isVerify, keyUser, createdAt, updatedAt);
             }
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
@@ -176,22 +182,32 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
             Connection con = JDBCUtil.getConnection();
 
             // Tạo câu lệnh SQL
-            String sql = "INSERT INTO order_signatures (order_id, signature, created_at, updated_at, is_signature_verified) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO order_signatures (order_id, signature, is_signature_verified, hash_order, key_user_id) VALUES (?, ?, ?, ?, ?)";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, orderSignature.getOrderId().getOrderId());
             ps.setString(2, orderSignature.getSignature());
-            ps.setTimestamp(3, orderSignature.getCreatedAt());
-            ps.setTimestamp(4, orderSignature.getUpdatedAt());
-            ps.setBoolean(5, orderSignature.isSignatureVerified());
+            ps.setBoolean(3, orderSignature.isSignatureVerified());
+            ps.setString(4, orderSignature.getHashOrder());
 
+            // Kiểm tra nếu keyUser là null
+            if (orderSignature.getKeyUser() != null) {
+                ps.setInt(5, orderSignature.getKeyUser().getId());
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+
+            // Thực thi câu lệnh
             result = ps.executeUpdate();
+
+            // Đóng PreparedStatement
+            ps.close();
 
             // Đóng kết nối
             JDBCUtil.closeConnection(con);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error while inserting order signature", e);
         }
         return result;
     }
@@ -288,6 +304,68 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
         }
         return result; // Trả về số dòng bị ảnh hưởng
     }
+
+    public int updateByOrderId(int orderId, String signature) {
+        int result = 0;
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu lệnh SQL để cập nhật signature, keyUser, và is_signature_verified
+            String sql = "UPDATE order_signatures " +
+                    "SET signature = ?,  is_signature_verified = ? " +
+                    "WHERE order_id = ?";
+
+            // Chuẩn bị câu lệnh
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, signature);          // Gán giá trị signature mới
+//            ps.setInt(2, keyUserId);             // Gán giá trị keyUserId
+            ps.setBoolean(2, true);              // Gán giá trị true cho is_signature_verified
+            ps.setInt(3, orderId);               // Gán giá trị orderId
+
+            // Thực thi câu lệnh cập nhật
+            result = ps.executeUpdate();
+
+            // Đóng PreparedStatement và kết nối
+            ps.close();
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating signature, keyUser, and verification status for orderId: " + orderId, e);
+        }
+        return result; // Trả về số dòng bị ảnh hưởng
+    }
+    public int updateByOrderIdKey(int orderId, String signature, int keyUserId) {
+        int result = 0;
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
+
+            // Tạo câu lệnh SQL để cập nhật signature, keyUser, và is_signature_verified
+            String sql = "UPDATE order_signatures " +
+                    "SET signature = ?, key_user_id = ?, is_signature_verified = ? " +
+                    "WHERE order_id = ?";
+
+            // Chuẩn bị câu lệnh
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, signature);          // Gán giá trị signature mới
+            ps.setInt(2, keyUserId);             // Gán giá trị keyUserId
+            ps.setBoolean(3, true);              // Gán giá trị true cho is_signature_verified
+            ps.setInt(4, orderId);               // Gán giá trị orderId
+
+            // Thực thi câu lệnh cập nhật
+            result = ps.executeUpdate();
+
+            // Đóng PreparedStatement và kết nối
+            ps.close();
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating signature, keyUser, and verification status for orderId: " + orderId, e);
+        }
+        return result; // Trả về số dòng bị ảnh hưởng
+    }
+
     public int updateVerifySignatureByOrderId(int orderId, boolean signature) {
         int result = 0;
         try {
@@ -326,7 +404,7 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
                 try (ResultSet rs = ps.executeQuery()) {
                     // Nếu tìm thấy hash trong cơ sở dữ liệu
                     if (rs.next()) {
-                        hash = rs.getString("hash");  // Lấy giá trị hash
+                        hash = rs.getString("hash_order");  // Lấy giá trị hash
                     }
                 }
             }
@@ -336,7 +414,37 @@ public class OrderSignatureDAO implements DAOInterface<OrderSignature> {
 
         return hash;
     }
+    public int insertOrderIdAndHash(int orderId, String hash) {
+        int result = 0;
+        try {
+            // Tạo kết nối đến cơ sở dữ liệu
+            Connection con = JDBCUtil.getConnection();
 
+            // Tạo câu lệnh SQL chỉ để chèn order_id và hash
+            String sql = "INSERT INTO order_signatures (order_id, hash_order) VALUES (?, ?)";
+
+            // Chuẩn bị câu lệnh
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, orderId);  // Gán giá trị order_id
+            ps.setString(2, hash); // Gán giá trị hash
+
+            // Thực thi câu lệnh SQL
+            result = ps.executeUpdate();
+
+            // Đóng PreparedStatement và kết nối
+            ps.close();
+            JDBCUtil.closeConnection(con);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error inserting order_id and hash", e);
+        }
+        return result; // Trả về số dòng bị ảnh hưởng
+    }
+
+    public static void main(String[] args) throws SQLException, NoSuchAlgorithmException {
+        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+
+    }
 
 }
 

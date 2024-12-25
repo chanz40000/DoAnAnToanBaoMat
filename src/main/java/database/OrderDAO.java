@@ -539,8 +539,8 @@ public class OrderDAO extends AbsDAO<Order>{
                 int statusSignature = rs.getInt("signature_status_id");
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
-                statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-                statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
+                statusSignature = checkAndUpdateSignatureStatus(con, idImport, status);
+                statusSignature = checkChangeDatabase(con, userId, idImport, status);
                 if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
@@ -620,61 +620,68 @@ public class OrderDAO extends AbsDAO<Order>{
 
         try {
             // Tính toán serialized_data
-            String serializedData = getSerializedDataForOrder(orderId); // Giả sử hàm này có hiệu quả
+            String serializedData = getSerializedDataForOrder(orderId);
             String calculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
 
-            // Truy vấn để lấy chữ ký và khóa công khai
-
-            String sql = """
-        SELECT os.signature, ku.public_key
-        FROM order_signatures os
-        LEFT JOIN key_user ku ON ku.user_id = ? AND ku.status = 'ON'
-        WHERE os.order_id = ?
+            // Truy vấn để lấy chữ ký và key_user_id từ order_signatures
+            String sqlSignature = """
+            SELECT os.signature, os.key_user_id
+            FROM order_signatures os
+            WHERE os.order_id = ?
         """;
 
+            try (PreparedStatement stSignature = con.prepareStatement(sqlSignature)) {
+                stSignature.setInt(1, orderId);
 
-            try (PreparedStatement st = con.prepareStatement(sql)) {
-                st.setInt(1, userId);
-                st.setInt(2, orderId);
-
-                try (ResultSet rs = st.executeQuery()) {
-                    if (rs.next()) {
-                        String signature = rs.getString("signature");
-                        String publicKey = rs.getString("public_key");
+                try (ResultSet rsSignature = stSignature.executeQuery()) {
+                    if (rsSignature.next()) {
+                        String signature = rsSignature.getString("signature");
+                        int keyUserId = rsSignature.getInt("key_user_id");
 
                         // Nếu không có chữ ký
                         if (signature == null) {
-                            // Nếu hash đúng trở lại, trạng thái = 1
                             if (isHashCorrect(serializedData, calculatedHash)) {
                                 updateOrderStatusSignature(con, orderId, 1);
                                 return 1;
                             } else {
-                                // Hash không đúng -> trạng thái = 2
                                 updateOrderStatusSignature(con, orderId, 2);
                                 return 2;
                             }
                         }
 
-                        // Nếu có chữ ký, giải mã hash từ chữ ký
-                        String decryptedHash = RSA.decryptHash(publicKey, signature);
+                        // Truy vấn để lấy public_key từ bảng key_user dựa vào key_user_id
+                        String sqlPublicKey = """
+                        SELECT ku.public_key
+                        FROM key_user ku
+                        WHERE ku.id = ?
+                    """;
 
-                        // So sánh hash đã tính và hash giải mã
-                        if (calculatedHash.equals(decryptedHash)) {
-                            // Hash khớp -> trạng thái = 3
-                            updateOrderStatusSignature(con, orderId, 3);
-                            return 3;
-                        } else {
-                            // Hash không khớp -> trạng thái = 2
-                            updateOrderStatusSignature(con, orderId, 2);
+                        try (PreparedStatement stPublicKey = con.prepareStatement(sqlPublicKey)) {
+                            stPublicKey.setInt(1, keyUserId);
 
-                            return 2;
+                            try (ResultSet rsPublicKey = stPublicKey.executeQuery()) {
+                                if (rsPublicKey.next()) {
+                                    String publicKey = rsPublicKey.getString("public_key");
+
+                                    // Nếu có chữ ký, giải mã hash từ chữ ký
+                                    String decryptedHash = RSA.decryptHash(publicKey, signature);
+
+                                    // So sánh hash đã tính và hash giải mã
+                                    if (calculatedHash.equals(decryptedHash)) {
+                                        updateOrderStatusSignature(con, orderId, 3);
+                                        return 3;
+                                    } else {
+                                        updateOrderStatusSignature(con, orderId, 2);
+                                        return 2;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // Nếu có lỗi, coi là trạng thái không hợp lệ
             updateOrderStatusSignature(con, orderId, 2);
             return 2;
         }
@@ -682,6 +689,7 @@ public class OrderDAO extends AbsDAO<Order>{
         // Trả về trạng thái hiện tại nếu không có thay đổi
         return currentStatus;
     }
+
 
     // Hàm kiểm tra hash có đúng hay không
     private boolean isHashCorrect(String serializedData, String calculatedHash) throws NoSuchAlgorithmException {
@@ -1225,21 +1233,23 @@ public class OrderDAO extends AbsDAO<Order>{
     }
     public static void main(String[] args) throws SQLException, NoSuchAlgorithmException {
         OrderDAO orderDAO = new OrderDAO();
-        Order order = orderDAO.selectById(1);
+        Order order = orderDAO.selectById(3);
 //        orderDAO.updateStatusOrder(3,new StatusOrder(13));
 //        double[]rs=orderDAO.revenueForWeek(Date.valueOf(LocalDateTime.now().toLocalDate()));
 //        for (int i=0; i<5; i++){
 //            System.out.println(rs[i]);
 //        }
         UserDAO userDAO = new UserDAO();
-        User user = userDAO.selectById(5);
-                String hash = Hash.calculateHash(orderDAO.getSerializedDataForOrder(1).toString().getBytes(StandardCharsets.UTF_8));
-        System.out.println(hash);
+        User user = userDAO.selectById(2);
+                String hash = Hash.calculateHash(orderDAO.getSerializedDataForOrder(3).toString().getBytes(StandardCharsets.UTF_8));
+        System.out.println("Hash trong database: "+hash);
                 // lay public key giai ma chu ky
         KeyUserDAO keyUserDAO = new KeyUserDAO();
         KeyUser keyUser = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
         OrderSignatureDAO orderSignatureDao = new OrderSignatureDAO();
         OrderSignature orderSignature = orderSignatureDao.selectByOrderId(order.getOrderId());
+        String sign = orderSignature.getSignature();
+        System.out.println("Chu ky: "+sign);
         // Lấy hash đã lưu từ cơ sở dữ liệu
         String storedHash = RSA.decryptHash(keyUser.getKey(), orderSignature.getSignature());
 //        String storedHash = orderSignatureDAO.getHashByOrderId(orderId);
