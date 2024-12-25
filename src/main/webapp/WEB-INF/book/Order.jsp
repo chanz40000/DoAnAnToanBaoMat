@@ -369,31 +369,47 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
-                                                <button class="badge bg-success me-1"
-                                                        style="font-size: 22px; border: none; width: auto; color: white"
-                                                        onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
-                                                    Xác nhận
-                                                </button>
-                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
-                                                <!-- Unique container for each cancel section -->
-                                                <div class="overlay" style="display:none;"></div>
-                                                <div class="reasonCancel" style="display:none;">
-                                                    <div class="re">
-                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
-                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                            <input type="hidden" name="action" value="CancelOrder1" />
-                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
+
+                                                <c:choose>
+                                                    <c:when test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <!-- Hiển thị cả hai nút -->
+                                                        <button class="badge bg-success me-1"
+                                                                style="font-size: 22px; border: none; width: auto; color: white"
+                                                                onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
+                                                            Xác nhận
+                                                        </button>
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="CancelOrder1" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:when test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <!-- Hiển thị chỉ nút hủy -->
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="CancelOrder1" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                </c:choose>
+
 
                                             </div>
                                         </div>
@@ -470,26 +486,22 @@
                                                 </c:if>
 
 
+                                                <!-- Hiển thị chỉ nút hủy -->
                                                 <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
-                                                <!-- Unique container for each cancel section -->
                                                 <div class="overlay" style="display:none;"></div>
                                                 <div class="reasonCancel" style="display:none;">
-                                                    <div class="re">
-                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                    <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                        <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                        <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                        <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
                                                             <input type="hidden" name="orderId" value="${order.orderId}" />
                                                             <input type="hidden" name="action" value="CancelOrder1" />
-                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
                                                         </form>
                                                     </div>
                                                 </div>
+
+
                                             </div>
                                         </div>
                                     </div>
@@ -567,34 +579,51 @@
                                             <div class="detailOrder">
                                                 <c:choose>
                                                     <c:when test="${order.status.statusId == 2}">
+                                                        <!-- Hiển thị chỉ nút hủy -->
                                                         <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
                                                         <div class="overlay" style="display:none;"></div>
                                                         <div class="reasonCancel" style="display:none;">
-                                                            <div class="re">
-                                                                <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                                <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                                <form action="ChangeStatusOrderUser" method="post">
-                                                                    <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                                    <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                                    <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                                    <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                                    <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                                    <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
                                                                     <input type="hidden" name="orderId" value="${order.orderId}" />
                                                                     <input type="hidden" name="action" value="CancelOrder2" />
-                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
                                                                 </form>
                                                             </div>
                                                         </div>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                            <input type="hidden" name="action" value="ReturnCancelOrder2" />
-                                                            <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
-                                                        </form>
+                                                        <c:choose>
+                                                            <c:when test="${order.statusSignature.statusSignatureId == 2}">
+                                                                <!-- Hiển thị chỉ nút hủy yêu cầu khi statusSignatureId == 2 -->
+                                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                                <div class="overlay" style="display:none;"></div>
+                                                                <div class="reasonCancel" style="display:none;">
+                                                                    <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                        <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                        <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                        <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                            <input type="hidden" name="action" value="CancelOrder1" />
+                                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Hiển thị nút hủy yêu cầu -->
+                                                                <form action="ChangeStatusOrderUser" method="post">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="ReturnCancelOrder2" />
+                                                                    <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
+                                                                </form>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </c:otherwise>
                                                 </c:choose>
+
 
                                             </div>
                                         </div>

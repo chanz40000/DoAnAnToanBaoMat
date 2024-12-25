@@ -41,28 +41,27 @@ public class ChangeStatusOrderUser extends HttpServlet {
 
         if ("CancelOrder1".equals(action)) {
             // huy don hang khi trong trang thai dang cho admin xac nhan don hang
-            updateOrderStatus(orderId, huyDonHang, user, reason);
+            updateOrderStatus(orderId, huyDonHang);
         } else if ("CancelOrder2".equals(action)) {
             // huy don hang khi trong trang thai dang dong goi va cho admin xac nhan yeu cau huy
-            updateOrderStatus(orderId, yeuCauHuy, user, reason);
+            updateOrderStatus(orderId, yeuCauHuy);
         } else if ("ReturnCancelOrder2".equals(action)) {
             // Huy yeu cau huy don neu admin chua xac nhan yeu cau huy don do
-            String reasonReturn = "Hủy yêu cầu hủy đơn";
-            updateOrderStatus(orderId, dongGoi, user, reasonReturn);
+            updateOrderStatus(orderId, dongGoi);
         } else if ("ReceiveOrder".equals(action)) {
-            String reasonReturn = "Khách hàng đã xác nhận nhận hàng thành công";
-            updateOrderStatus(orderId, daNhan, user, reasonReturn);
+            updateOrderStatus(orderId, daNhan);
         } else if ("ReturnOrder".equals(action)) {
             // khach hang yeu cau tra hang
-            updateOrderStatus(orderId, traHang, user, reason);
+            updateOrderStatus(orderId, traHang);
         } else if ("CancelReturnOrder".equals(action)) {
-            String reasonReturn = "Khách hàng đã hủy yêu cầu trả hàng";
-            updateOrderStatus(orderId, daNhan, user, reasonReturn);
+            updateOrderStatus(orderId, daNhan);
+        } else if ("CancelWhenChangeDatabase".equals(action)) {
+            updateOrderStatus(orderId, huyDonHang);
         }
         request.setAttribute("action", action);
         response.sendRedirect(request.getContextPath() + "/Order");
     }
-    private void updateOrderStatus(int orderId, StatusOrder status, User user, String reason){
+    private void updateOrderStatus(int orderId, StatusOrder status){
         // cap nhat trang thai don hang
         orderDAO.updateStatusOrder(orderId, status);
         // lay order theo id cua order do

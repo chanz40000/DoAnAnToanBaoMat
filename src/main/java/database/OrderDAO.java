@@ -625,8 +625,8 @@ public class OrderDAO extends AbsDAO<Order>{
 
             // Truy vấn để lấy chữ ký và key_user_id từ order_signatures
             String sqlSignature = """
-            SELECT os.signature, os.key_user_id
-            FROM order_signatures os
+            SELECT os.signature, os.key_user_id, o.signature_status_id, os.hash_order
+            FROM order_signatures os JOIN orders o
             WHERE os.order_id = ?
         """;
 
@@ -637,13 +637,20 @@ public class OrderDAO extends AbsDAO<Order>{
                     if (rsSignature.next()) {
                         String signature = rsSignature.getString("signature");
                         int keyUserId = rsSignature.getInt("key_user_id");
+                        int signatureStatusId = rsSignature.getInt("signature_status_id");
+                        String hashOrder = rsSignature.getString("hash_order");
+
 
                         // Nếu không có chữ ký
+                        // Nếu không có chữ ký
                         if (signature == null) {
-                            if (isHashCorrect(serializedData, calculatedHash)) {
+                            // So sánh hash_order với hash đã tính
+                            if (calculatedHash.equals(hashOrder)) {
+                                // Hash khớp -> cập nhật trạng thái = 1
                                 updateOrderStatusSignature(con, orderId, 1);
                                 return 1;
                             } else {
+                                // Hash không khớp -> cập nhật trạng thái = 2
                                 updateOrderStatusSignature(con, orderId, 2);
                                 return 2;
                             }
@@ -689,7 +696,6 @@ public class OrderDAO extends AbsDAO<Order>{
         // Trả về trạng thái hiện tại nếu không có thay đổi
         return currentStatus;
     }
-
 
     // Hàm kiểm tra hash có đúng hay không
     private boolean isHashCorrect(String serializedData, String calculatedHash) throws NoSuchAlgorithmException {
