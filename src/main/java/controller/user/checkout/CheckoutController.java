@@ -222,7 +222,7 @@ public class CheckoutController extends HttpServlet {
                         // Vòng lặp kiểm tra và cập nhật trạng thái đơn hàng khi có thay đổi về hash
                         while (true) {
                             // Lấy lại serializedData và tính lại hash
-                            String newSerializedData = orderSignatureDAO.getSerializedDataForOrder(order.getOrderId());
+                            String newSerializedData = orderDAO.getSerializedDataForOrder(order.getOrderId());
                             String newHash = Hash.calculateHash(newSerializedData.getBytes(StandardCharsets.UTF_8));
 
                             // Lấy hash cũ từ cơ sở dữ liệu
