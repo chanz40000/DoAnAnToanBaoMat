@@ -600,7 +600,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     stUpdate.executeUpdate();
                 }
 
-                System.out.println("Cap nhat trang thai thanh cong!");
+
             } else {
                 System.out.println("Không tìm thấy thời gian hết hạn hoặc thời gian tạo khóa phù hợp.");
             }
