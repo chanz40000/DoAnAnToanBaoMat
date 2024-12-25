@@ -135,8 +135,8 @@ public class VerifySignature extends HttpServlet {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDate = now.format(formatter);
             Timestamp signTimestamp = Timestamp.valueOf(formattedDate);
-            OrderSignature orderSignature = new OrderSignature(order, signature, true, signTimestamp);
-            int addHash = orderSignatureDAO.insert(orderSignature);
+            OrderSignature orderSignature = orderSignatureDAO.selectByOrderId(order.getOrderId());
+            int addHash = orderSignatureDAO.updateByOrderIdKey(order.getOrderId(), signature, userKey.getId());
             if (addHash > 0) {
                 if (order.getPayment().getPaymentId() == 1) {
                     StatusOrder statusOrder = new StatusOrder(9);

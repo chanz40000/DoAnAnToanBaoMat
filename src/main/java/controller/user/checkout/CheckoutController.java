@@ -194,13 +194,12 @@ public class CheckoutController extends HttpServlet {
                         System.out.println("Hash (Checkout): " + hash + " cua don hang: " + order.getOrderId());
 
                         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-
+                            // Lưu thông tin hash vào cơ sở dữ liệu
+                            OrderSignature orderSignature  = new OrderSignature(hash, order);
+                            orderSignatureDAO.insertOrderIdAndHash(order.getOrderId(), hash);
                         // Kiểm tra nếu hash không null và không rỗng
                         if (hash != null && !hash.isEmpty()) {
-                            // Lưu thông tin chữ ký vào cơ sở dữ liệu
-                            //OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-                            // Lưu vào cơ sở dữ liệu nếu cần
-                            // orderSignatureDAO.saveOrderSignature(order.getOrderId(), hash);
+
 
                             // Gửi email cho người dùng
                             Email.sendEmailHashOrderToUser(user.getName(), hash, order);
@@ -213,6 +212,8 @@ public class CheckoutController extends HttpServlet {
                     } catch (NoSuchAlgorithmException e) {
 
                         throw new RuntimeException(e);
+//                    } catch (SQLException e) {
+//                        throw new RuntimeException(e);
                     }
                 });
 
