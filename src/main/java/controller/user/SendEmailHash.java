@@ -40,42 +40,39 @@ public class SendEmailHash extends HttpServlet {
             return;
         }
 
-        try {
-            // Serialize dữ liệu để tạo chuỗi hash
-            StringBuilder serializedData = new StringBuilder();
-            Order orderInDatabase = orderDAO.selectById(order.getOrderId());
-            serializedData.append("user_id:").append(user.getUserId()).append(",");
-            serializedData.append("email:").append(user.getEmail()).append(",");
-            serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
-            serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
-            serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
-            serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
+        //            // Serialize dữ liệu để tạo chuỗi hash
+//            StringBuilder serializedData = new StringBuilder();
+//            Order orderInDatabase = orderDAO.selectById(order.getOrderId());
+//            serializedData.append("user_id:").append(user.getUserId()).append(",");
+//            serializedData.append("email:").append(user.getEmail()).append(",");
+//            serializedData.append("order_id:").append(orderInDatabase.getOrderId()).append(",");
+//            serializedData.append("total_price:").append(orderInDatabase.getTotalPrice()).append(",");
+//            serializedData.append("booking_date:").append(orderInDatabase.getBookingDate()).append(",");
+//            serializedData.append("shipping_fee:").append(orderInDatabase.getShippingFee()).append(",");
+//
+//            for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
+//                serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
+//                serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
+//                serializedData.append("price:").append(cartItem.getPrice()).append(",");
+//                serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+//            }
+        OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
+        OrderSignature orderSignature = orderSignatureDAO.selectByOrderId(order.getOrderId());
+        String hash = orderSignature.getHashOrder();
 
-            for (OrderDetail cartItem : orderDetailDAO.selectByOrderId(orderInDatabase.getOrderId())) {
-                serializedData.append("product_id:").append(cartItem.getProduct().getProductId()).append(",");
-                serializedData.append("product_name:").append(cartItem.getProduct().getProduct_name()).append(",");
-                serializedData.append("price:").append(cartItem.getPrice()).append(",");
-                serializedData.append("quantity:").append(cartItem.getQuantity()).append(",");
+        // Trả lời ngay lập tức rằng hash đã được gửi thành công
+        response.getWriter().write("Hash sent successfully.");
+
+        // Tạo một luồng mới để gửi email trong nền
+        new Thread(() -> {
+            try {
+                // Gửi email trong nền
+                Email.sendEmailHashOrderToUser(user.getName(), hash, order);
+            } catch (Exception e) {
+                e.printStackTrace(); // Ghi log nếu gửi email gặp lỗi
             }
+        }).start();
 
-            String hash = Hash.calculateHash(serializedData.toString().getBytes(StandardCharsets.UTF_8));
-
-            // Trả lời ngay lập tức rằng hash đã được gửi thành công
-            response.getWriter().write("Hash sent successfully.");
-
-            // Tạo một luồng mới để gửi email trong nền
-            new Thread(() -> {
-                try {
-                    // Gửi email trong nền
-                    Email.sendEmailHashOrderToUser(user.getName(), hash, order);
-                } catch (Exception e) {
-                    e.printStackTrace(); // Ghi log nếu gửi email gặp lỗi
-                }
-            }).start();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
