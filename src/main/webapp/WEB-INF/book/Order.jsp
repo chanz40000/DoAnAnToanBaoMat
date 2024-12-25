@@ -477,7 +477,7 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
-                                                <c:if test="${order.status.statusId == 9}">
+                                                <c:if test="${order.status.statusId == 9 && order.statusSignature.statusSignatureId != 2}">
                                                     <button class="badge bg-success me-1"
                                                             style="font-size: 22px; border: none; width: auto; color: white"
                                                     >
