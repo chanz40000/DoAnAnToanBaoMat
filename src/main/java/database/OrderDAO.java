@@ -1,10 +1,15 @@
 package database;
 
 import model.*;
+import util.Hash;
+import util.RSA;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -56,7 +61,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
+                statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -100,8 +109,12 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
+                statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
 
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -249,7 +262,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
+                statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -309,8 +326,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
-
+                statusSignature = checkChangeDatabase(con, idUser, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -356,8 +376,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
-
+                statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
+                if (status == 3 && statusSignature ==2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -405,8 +428,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
-
+                statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -452,8 +478,11 @@ public class OrderDAO extends AbsDAO<Order>{
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
                 statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
-
+                statusSignature = checkChangeDatabase(con, userId, idImport, statusSignature);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -510,8 +539,12 @@ public class OrderDAO extends AbsDAO<Order>{
                 int statusSignature = rs.getInt("signature_status_id");
 
                 // Áp dụng phương thức kiểm tra và cập nhật trạng thái chữ ký
-                statusSignature = checkAndUpdateSignatureStatus(con, idImport, statusSignature);
-
+                statusSignature = checkAndUpdateSignatureStatus(con, idImport, status);
+                statusSignature = checkChangeDatabase(con, userId, idImport, status);
+                if (status == 3 && statusSignature == 2) {
+                    updateOrderStatus(con, idImport, 13);
+                }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -527,6 +560,154 @@ public class OrderDAO extends AbsDAO<Order>{
 
         return orders;
     }
+    public void updateOrdersBasedOnKeyStatus() {
+        try {
+            Connection con = JDBCUtil.getConnection();
+
+            // Lấy thời gian hết hạn của key mới nhất có trạng thái "OFF"
+            String sqlOff = "SELECT expired_at FROM key_user WHERE status = 'OFF' ORDER BY expired_at DESC LIMIT 1";
+            PreparedStatement stOff = con.prepareStatement(sqlOff);
+            ResultSet rsOff = stOff.executeQuery();
+            Timestamp expiredAt = null;
+            if (rsOff.next()) {
+                expiredAt = rsOff.getTimestamp("expired_at");
+            }
+
+            // Lấy thời gian tạo của key có trạng thái "ON"
+            String sqlOn = "SELECT create_at FROM key_user WHERE status = 'ON' ORDER BY create_at ASC LIMIT 1";
+            PreparedStatement stOn = con.prepareStatement(sqlOn);
+            ResultSet rsOn = stOn.executeQuery();
+            Timestamp createAt = null;
+            if (rsOn.next()) {
+                createAt = rsOn.getTimestamp("create_at");
+            }
+
+            // Kiểm tra nếu cả hai thời điểm được tìm thấy
+            if (expiredAt != null && createAt != null) {
+                // Tìm các đơn hàng có ngày đặt trong khoảng thời gian từ expiredAt đến createAt
+                String sqlOrders = "SELECT order_id FROM orders WHERE booking_date BETWEEN ? AND ?";
+                PreparedStatement stOrders = con.prepareStatement(sqlOrders);
+                stOrders.setTimestamp(1, expiredAt);
+                stOrders.setTimestamp(2, createAt);
+                ResultSet rsOrders = stOrders.executeQuery();
+
+                // Cập nhật trạng thái của các đơn hàng tìm được thành `status6`
+                String updateSql = "UPDATE orders SET status_id = 6 WHERE order_id = ?";
+                PreparedStatement stUpdate = con.prepareStatement(updateSql);
+                while (rsOrders.next()) {
+                    int orderId = rsOrders.getInt("order_id");
+                    stUpdate.setInt(1, orderId);
+                    stUpdate.executeUpdate();
+                }
+
+                System.out.println("Cap nhat trang thai thanh cong!");
+            } else {
+                System.out.println("Không tìm thấy thời gian hết hạn hoặc thời gian tạo khóa phù hợp.");
+            }
+
+            // Đóng kết nối
+            JDBCUtil.closeConnection(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int checkChangeDatabase(Connection con, int userId, int orderId, int currentStatus) throws SQLException {
+        // Nếu trạng thái đơn hàng là 6, bỏ qua kiểm tra
+        if (currentStatus == 6) {
+            return currentStatus;
+        }
+
+        try {
+            // Tính toán serialized_data
+            String serializedData = getSerializedDataForOrder(orderId);
+            String calculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
+
+            // Truy vấn để lấy chữ ký và key_user_id từ order_signatures
+            String sqlSignature = """
+            SELECT os.signature, os.key_user_id, o.signature_status_id, os.hash_order
+            FROM order_signatures os JOIN orders o
+            WHERE os.order_id = ?
+        """;
+
+            try (PreparedStatement stSignature = con.prepareStatement(sqlSignature)) {
+                stSignature.setInt(1, orderId);
+
+                try (ResultSet rsSignature = stSignature.executeQuery()) {
+                    if (rsSignature.next()) {
+                        String signature = rsSignature.getString("signature");
+                        int keyUserId = rsSignature.getInt("key_user_id");
+                        int signatureStatusId = rsSignature.getInt("signature_status_id");
+                        String hashOrder = rsSignature.getString("hash_order");
+
+
+                        // Nếu không có chữ ký
+                        // Nếu không có chữ ký
+                        if (signature == null) {
+                            // So sánh hash_order với hash đã tính
+                            if (calculatedHash.equals(hashOrder)) {
+                                // Hash khớp -> cập nhật trạng thái = 1
+                                updateOrderStatusSignature(con, orderId, 1);
+                                return 1;
+                            } else {
+                                // Hash không khớp -> cập nhật trạng thái = 2
+                                updateOrderStatusSignature(con, orderId, 2);
+                                return 2;
+                            }
+                        }
+
+                        // Truy vấn để lấy public_key từ bảng key_user dựa vào key_user_id
+                        String sqlPublicKey = """
+                        SELECT ku.public_key
+                        FROM key_user ku
+                        WHERE ku.id = ?
+                    """;
+
+                        try (PreparedStatement stPublicKey = con.prepareStatement(sqlPublicKey)) {
+                            stPublicKey.setInt(1, keyUserId);
+
+                            try (ResultSet rsPublicKey = stPublicKey.executeQuery()) {
+                                if (rsPublicKey.next()) {
+                                    String publicKey = rsPublicKey.getString("public_key");
+
+                                    // Nếu có chữ ký, giải mã hash từ chữ ký
+                                    String decryptedHash = RSA.decryptHash(publicKey, signature);
+
+                                    // So sánh hash đã tính và hash giải mã
+                                    if (calculatedHash.equals(decryptedHash)) {
+                                        updateOrderStatusSignature(con, orderId, 3);
+                                        return 3;
+                                    } else {
+                                        updateOrderStatusSignature(con, orderId, 2);
+                                        return 2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            updateOrderStatusSignature(con, orderId, 2);
+            return 2;
+        }
+
+        // Trả về trạng thái hiện tại nếu không có thay đổi
+        return currentStatus;
+    }
+
+    // Hàm kiểm tra hash có đúng hay không
+    private boolean isHashCorrect(String serializedData, String calculatedHash) throws NoSuchAlgorithmException {
+        // Tính lại hash từ dữ liệu gốc
+        String recalculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
+        System.out.println("Hash tính lại: " + recalculatedHash);
+
+        // So sánh với hash đã tính trước đó
+        return recalculatedHash.equals(calculatedHash);
+    }
+
+
 
     // Phương thức kiểm tra và cập nhật signature_status_id
     private int checkAndUpdateSignatureStatus(Connection con, int orderId, int currentStatusSignature) throws SQLException {
@@ -539,7 +720,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 try (ResultSet checkExistRs = checkExistSt.executeQuery()) {
                     if (checkExistRs.next() && checkExistRs.getInt("count") == 0) {
                         // Không có bản ghi chữ ký -> cập nhật trạng thái về 2
-                        updateOrderStatus(con, orderId, 2);
+                        updateOrderStatusSignature(con, orderId, 2);
                         return 2;
                     }
                 }
@@ -553,7 +734,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     while (checkRs.next()) {
                         if (!checkRs.getBoolean("is_signature_verified")) {
                             // Có ít nhất một chữ ký chưa xác minh -> cập nhật trạng thái về 2
-                            updateOrderStatus(con, orderId, 2);
+                            updateOrderStatusSignature(con, orderId, 2);
                             return 2;
                         }
                     }
@@ -580,7 +761,7 @@ public class OrderDAO extends AbsDAO<Order>{
 
                     if (hasSignatures && allSignaturesVerified) {
                         // Tất cả chữ ký đã được xác minh -> trạng thái đã bị chỉnh sửa
-                        updateOrderStatus(con, orderId, 2);
+                        updateOrderStatusSignature(con, orderId, 2);
                         return 2;
                     }
                 }
@@ -591,8 +772,76 @@ public class OrderDAO extends AbsDAO<Order>{
         return currentStatusSignature;
     }
 
+    public String getSerializedDataForOrder(int orderId) throws SQLException {
+        StringBuilder serializedData = new StringBuilder();
+
+        // Câu lệnh SQL để lấy dữ liệu từ các bảng, chỉ lấy các trường cần thiết
+        String query = "SELECT " +
+                "u.user_id, " +
+                "u.email, " +
+                "o.order_id, " +
+                "o.total_price, " +
+                "o.booking_date, " +
+                "o.shipping_fee " +
+                "FROM orders o " +
+                "JOIN users u ON o.user_id = u.user_id " +
+                "WHERE o.order_id = ?";  // Sử dụng orderId từ tham số
+
+        try (Connection con = JDBCUtil.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, orderId);  // Gán giá trị orderId vào câu lệnh SQL
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Thêm thông tin user vào serializedData
+                    serializedData.append("user_id:").append(rs.getInt("user_id")).append(",");
+                    serializedData.append("email:").append(rs.getString("email")).append(",");
+                    serializedData.append("order_id:").append(rs.getInt("order_id")).append(",");
+                    serializedData.append("total_price:").append(rs.getDouble("total_price")).append(",");
+
+                    // Định dạng ngày giờ booking (bao gồm phần .0 sau giây)
+                    java.sql.Timestamp timestamp = rs.getTimestamp("booking_date");
+                    if (timestamp != null) {
+                        // Định dạng ngày giờ với .0 sau giây (yyyy-MM-dd HH:mm:ss.SSS)
+                        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(timestamp);
+                        serializedData.append("booking_date:").append(formattedDate).append(",");
+                    } else {
+                        serializedData.append("booking_date:null,");
+                    }
+
+                    // Thêm phí vận chuyển
+                    serializedData.append("shipping_fee:").append(rs.getDouble("shipping_fee")).append(",");
+
+                    // Lấy thông tin chi tiết đơn hàng từ bảng OrderDetails
+                    String detailQuery = "SELECT p.product_id, p.product_name, od.price, od.quantity " +
+                            "FROM orderdetails od " +
+                            "JOIN products p ON od.product_id = p.product_id " +
+                            "WHERE od.order_id = ?";
+
+                    try (PreparedStatement psDetail = con.prepareStatement(detailQuery)) {
+                        psDetail.setInt(1, orderId);  // Gán giá trị orderId vào câu lệnh SQL
+
+                        try (ResultSet rsDetail = psDetail.executeQuery()) {
+                            while (rsDetail.next()) {
+                                serializedData.append("product_id:").append(rsDetail.getInt("product_id")).append(",");
+                                serializedData.append("product_name:").append(rsDetail.getString("product_name")).append(",");
+                                serializedData.append("price:").append(rsDetail.getDouble("price")).append(",");
+                                serializedData.append("quantity:").append(rsDetail.getInt("quantity")).append(",");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Xóa dấu phẩy cuối cùng để chuỗi không có dấu phẩy thừa
+
+        return serializedData.toString();
+    }
+
+
     // Hàm tiện ích để cập nhật trạng thái đơn hàng
-    private void updateOrderStatus(Connection con, int orderId, int newStatus) throws SQLException {
+    private void updateOrderStatusSignature(Connection con, int orderId, int newStatus) throws SQLException {
         String updateSql = "UPDATE orders SET signature_status_id = ? WHERE order_id = ?";
         try (PreparedStatement updateSt = con.prepareStatement(updateSql)) {
             updateSt.setInt(1, newStatus);
@@ -600,6 +849,16 @@ public class OrderDAO extends AbsDAO<Order>{
             updateSt.executeUpdate();
         }
     }
+
+    private void updateOrderStatus(Connection con, int orderId, int newStatus) throws SQLException {
+        String updateSql = "UPDATE orders SET status_id = ? WHERE order_id = ?";
+        try (PreparedStatement updateSt = con.prepareStatement(updateSql)) {
+            updateSt.setInt(1, newStatus);
+            updateSt.setInt(2, orderId);
+            updateSt.executeUpdate();
+        }
+    }
+
 
 
     public List<Order> selectByUserIdAndStatusSignatureIds(int userId, int... statusSignatureIds) {
@@ -978,14 +1237,34 @@ public class OrderDAO extends AbsDAO<Order>{
 
         return result;
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException, NoSuchAlgorithmException {
         OrderDAO orderDAO = new OrderDAO();
-        orderDAO.updateStatusOrder(3,new StatusOrder(13));
-        double[]rs=orderDAO.revenueForWeek(Date.valueOf(LocalDateTime.now().toLocalDate()));
-        for (int i=0; i<5; i++){
-            System.out.println(rs[i]);
+        Order order = orderDAO.selectById(3);
+//        orderDAO.updateStatusOrder(3,new StatusOrder(13));
+//        double[]rs=orderDAO.revenueForWeek(Date.valueOf(LocalDateTime.now().toLocalDate()));
+//        for (int i=0; i<5; i++){
+//            System.out.println(rs[i]);
+//        }
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.selectById(2);
+                String hash = Hash.calculateHash(orderDAO.getSerializedDataForOrder(3).toString().getBytes(StandardCharsets.UTF_8));
+        System.out.println("Hash trong database: "+hash);
+                // lay public key giai ma chu ky
+        KeyUserDAO keyUserDAO = new KeyUserDAO();
+        KeyUser keyUser = keyUserDAO.selectByUserIdStatus(user.getUserId(), "ON");
+        OrderSignatureDAO orderSignatureDao = new OrderSignatureDAO();
+        OrderSignature orderSignature = orderSignatureDao.selectByOrderId(order.getOrderId());
+        String sign = orderSignature.getSignature();
+        System.out.println("Chu ky: "+sign);
+        // Lấy hash đã lưu từ cơ sở dữ liệu
+        String storedHash = RSA.decryptHash(keyUser.getKey(), orderSignature.getSignature());
+//        String storedHash = orderSignatureDAO.getHashByOrderId(orderId);
+        System.out.println(storedHash);
+        if (hash.equals(storedHash)){
+            System.out.println("don hang khong bi thay doi");
+        }else {
+            System.out.println("Bi thay doi");
         }
-
     }
 
 }

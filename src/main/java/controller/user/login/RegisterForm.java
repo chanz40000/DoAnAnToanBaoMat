@@ -14,12 +14,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,32 +101,29 @@ public class RegisterForm extends HttpServlet {
 
                 User customer = new User((cd.creatId() + 1), username, password, 2, solve(name), null, null, null, email, null);
                 cd.insert(customer);
+                HttpSession session = request.getSession();
+                request.setAttribute("usernamere", username);  // Set username in session
+                request.setAttribute("passwordre", password);  // Set password in session
+                request.setAttribute("emailre", email);        // Set email in session
+                request.setAttribute("namere", name);          // Set name in session
 
-                //tao key
-                RSA rsa = new RSA();
-                String publicKey = rsa.getPublicKey();
-                String privateKey = rsa.getPrivateKey();
 
-                KeyUserDAO keyUserDAO = new KeyUserDAO();
 
-                LocalDateTime now = LocalDateTime.now();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDate = now.format(formatter);
-                Timestamp reportTimestamp = Timestamp.valueOf(formattedDate);
-                Timestamp maxTimestamp =  Timestamp.valueOf("2038-01-19 03:14:07");
+                // Tạo OTP và gửi email
+                Random rand = new Random();
+                int otp = rand.nextInt(1000000);  // Tạo OTP 6 chữ số
 
-                keyUserDAO.insert(new KeyUser(customer, publicKey, reportTimestamp, maxTimestamp, "ON"));
-                String emailSubject = "Thong bao dang ky tai khoan thanh cong!";
-                String emailBody = "Hellooo,\n\n" +
-                        "Chuc mung ban da tro thanh khach hang than thiet cua chung toi! \n\n" +
-                        "Khoa bao mat cua ban duoc dinh kem o duoi.\n" + "\n\n" +
-                        "Vui long gi khoa va khong chia se voi nguoi khac.\n\n" +
-                        "Tran trong,\nCua hang sach cutee.";
+                // Gửi OTP qua email
+                String emailSubject = "Mã OTP đăng ký tài khoản";
+                String emailBody = "Mã OTP của bạn là: " + otp;
+                Email.sendEmail(email, emailBody, emailSubject);
 
-                System.out.println(privateKey);
-                Email.sendEmailWithAttachment(email, emailSubject, emailBody, "private_key.txt", privateKey);
+                // Lưu OTP vào session để kiểm tra sau
+                session.setAttribute("otpregister", otp);
+                session.setAttribute("email", email);
 
-                url = "/WEB-INF/book/login.jsp";
+                // Chuyển hướng đến trang nhập OTP
+                url = "/WEB-INF/book/enterOTPRegister.jsp";  // Trang nhập OTP
             }
 
 

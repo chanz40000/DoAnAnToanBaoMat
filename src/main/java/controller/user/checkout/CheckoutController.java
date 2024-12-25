@@ -194,13 +194,12 @@ public class CheckoutController extends HttpServlet {
                         System.out.println("Hash (Checkout): " + hash + " cua don hang: " + order.getOrderId());
 
                         OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-
+                            // Lưu thông tin hash vào cơ sở dữ liệu
+                            OrderSignature orderSignature  = new OrderSignature(hash, order);
+                            orderSignatureDAO.insertOrderIdAndHash(order.getOrderId(), hash);
                         // Kiểm tra nếu hash không null và không rỗng
                         if (hash != null && !hash.isEmpty()) {
-                            // Lưu thông tin chữ ký vào cơ sở dữ liệu
-                            //OrderSignatureDAO orderSignatureDAO = new OrderSignatureDAO();
-                            // Lưu vào cơ sở dữ liệu nếu cần
-                            // orderSignatureDAO.saveOrderSignature(order.getOrderId(), hash);
+
 
                             // Gửi email cho người dùng
                             Email.sendEmailHashOrderToUser(user.getName(), hash, order);
@@ -208,53 +207,13 @@ public class CheckoutController extends HttpServlet {
                             System.err.println("Lỗi: Không thể tạo hash cho đơn hàng " + order.getOrderId());
                         }
 
-//                        OrderSignature orderSignature = new OrderSignature(order, hash);
-//                        int addHash = orderSignatureDAO.insert(orderSignature);
 
-//                        if (addHash > 0) {
-                            // Gửi mail
-//                            Email.sendEmailHashOrderToUser(user.getName(), hash, order);
-//                        }
+//                    } catch (NoSuchAlgorithmException | SQLException | InterruptedException e) {
+                    } catch (NoSuchAlgorithmException e) {
 
-                        // Kiểm tra và cập nhật trạng thái
-
-
-                        // Vòng lặp kiểm tra và cập nhật trạng thái đơn hàng khi có thay đổi về hash
-                        while (true) {
-                            // Lấy lại serializedData và tính lại hash
-                            String newSerializedData = orderSignatureDAO.getSerializedDataForOrder(order.getOrderId());
-                            String newHash = Hash.calculateHash(newSerializedData.getBytes(StandardCharsets.UTF_8));
-
-                            // Lấy hash cũ từ cơ sở dữ liệu
-                            String storedHash = orderSignatureDAO.getHashByOrderId(order.getOrderId());
-                            Order updatedOrder = orderDAO.selectById(order.getOrderId());
-                            String orderSignature1 = orderSignatureDAO.getSignatureOrderByOrderId(order.getOrderId());
-
-
-                            // So sánh hash cũ và hash mới
-                            // Kiểm tra nếu hash không giống nhau hoặc có chữ ký nhưng trạng thái không đúng
-                            if (storedHash != null && !storedHash.equals(newHash) ||
-                                    (storedHash.equals(newHash) && updatedOrder.getStatusSignature().getStatusSignatureId() == 3 && orderSignature1 == null) ||
-                                    (storedHash.equals(newHash) && updatedOrder.getStatus().getStatusId() != 11 && orderSignature1 == null) ||
-                                    (storedHash.equals(newHash) && updatedOrder.getStatusSignature().getStatusSignatureId() != 3 && orderSignature1 != null)) {
-
-                                // Cập nhật trạng thái của đơn hàng thành 13 nếu các điều kiện trên đúng
-                                StatusOrder statusChanged = new StatusOrder(13);
-                                orderDAO.updateStatusOrder(updatedOrder.getOrderId(), statusChanged);
-
-                                // Gửi thông báo qua email
-                                Email.sendNotify(user, updatedOrder, orderDetailDAO.selectByOrderId(updatedOrder.getOrderId()));
-
-                                // Thoát khỏi vòng lặp
-                                break;
-                            }
-
-                            // Đợi một giây trước khi kiểm tra lại
-                            Thread.sleep(1000);
-                        }
-
-                    } catch (NoSuchAlgorithmException | SQLException | InterruptedException e) {
                         throw new RuntimeException(e);
+//                    } catch (SQLException e) {
+//                        throw new RuntimeException(e);
                     }
                 });
 

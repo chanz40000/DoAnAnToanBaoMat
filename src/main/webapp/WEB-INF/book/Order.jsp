@@ -289,9 +289,6 @@
                                 <a class="nav-link" data-toggle="pill" href="#statusXacNhan">Chờ xác nhận</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" data-toggle="pill" href="#statusBiThayDoi">Bị thay đổi</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" data-toggle="pill" href="#StausLayHang">Chờ lấy hàng</a>
                             </li>
                             <li class="nav-item">
@@ -330,7 +327,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -372,31 +369,47 @@
                                                 <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #ef8640" class="fa-solid fa-check"></i></h3>
                                             </div>
                                             <div class="detailOrder">
-                                                <button class="badge bg-success me-1"
-                                                        style="font-size: 22px; border: none; width: auto; color: white"
-                                                        onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
-                                                    Xác nhận
-                                                </button>
-                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
-                                                <!-- Unique container for each cancel section -->
-                                                <div class="overlay" style="display:none;"></div>
-                                                <div class="reasonCancel" style="display:none;">
-                                                    <div class="re">
-                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
-                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                            <input type="hidden" name="action" value="CancelOrder1" />
-                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
+
+                                                <c:choose>
+                                                    <c:when test="${order.statusSignature.statusSignatureId == 1}">
+                                                        <!-- Hiển thị cả hai nút -->
+                                                        <button class="badge bg-success me-1"
+                                                                style="font-size: 22px; border: none; width: auto; color: white"
+                                                                onclick="window.location.href='/verify-order?OrderIdVerify=${order.orderId}'">
+                                                            Xác nhận
+                                                        </button>
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="CancelOrder1" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:when test="${order.statusSignature.statusSignatureId == 2}">
+                                                        <!-- Hiển thị chỉ nút hủy -->
+                                                        <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                        <div class="overlay" style="display:none;"></div>
+                                                        <div class="reasonCancel" style="display:none;">
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="CancelOrder1" />
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </c:when>
+                                                </c:choose>
+
 
                                             </div>
                                         </div>
@@ -423,7 +436,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -473,107 +486,29 @@
                                                 </c:if>
 
 
+                                                <!-- Hiển thị chỉ nút hủy -->
                                                 <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
-                                                <!-- Unique container for each cancel section -->
                                                 <div class="overlay" style="display:none;"></div>
                                                 <div class="reasonCancel" style="display:none;">
-                                                    <div class="re">
-                                                        <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                        <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                            <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                            <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                            <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                            <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                            <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                    <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                        <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                        <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                        <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
                                                             <input type="hidden" name="orderId" value="${order.orderId}" />
                                                             <input type="hidden" name="action" value="CancelOrder1" />
-                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
                                                         </form>
                                                     </div>
                                                 </div>
+
+
                                             </div>
                                         </div>
                                     </div>
                                 </c:forEach>
                             </div>
 
-                            <div id="statusBiThayDoi" class="container tab-pane fade">
-                                <c:set var="statusChanged" value="changed"/> <!-- Biến để xác định các đơn hàng bị thay đổi -->
-                                <c:set var="statusBiThayDoi" value="13"/>
-                                <!-- Kiểm tra và hiển thị các đơn hàng bị thay đổi -->
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusId(id, statusBiThayDoi)}">
-                                    <div class="orderEmpty">
-                                        <img height="100px" width="90px" src="/img/iconorder.png">
-                                        <p>Danh sách đơn hàng trống</p>
-                                    </div>
-                                </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusId(id, statusBiThayDoi)}">
-                                    <div class="fromOrder">
-                                        <div class="orderDetailProduct">
-                                            <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
-                                            <div class="img">
-                                                <img  width="120px" height="140px" src="/image/${detail.product.image}" alt="">
-                                            </div>
-                                            <div class="productDetail">
-                                                <div class="productName">
-                                                    <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
-                                                    <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
-                                                    </c:if>
-                                                    <c:if test="${order.statusSignature.statusSignatureId == 2}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
-                                                    </c:if>
-                                                    <c:if test="${order.statusSignature.statusSignatureId == 3}">
-                                                        <div style="color: #077800">${order.statusSignature.statusSignatureName} <i style="color: #077800;" class="fa-solid fa-check"></i></div>
-                                                    </c:if>
-                                                </div>
-                                                <div class="category">
-                                                    <p style="font-size: 15px">Thể loại: ${detail.product.category.categoryName}</p>
-                                                </div>
-                                                <div class="dateOrder">
-                                                    <p>${order.bookingDate}</p>
-                                                </div>
-                                                <div class="priceDetail">
-                                                    <div class="detail">
-                                                        <a href="/OrderDetail?OrderId=${order.orderId}">Chi tiết sản phẩm</a>
-                                                    </div>
-                                                    <div class="productPrice">
-                                                        <h4>${FormatCurrency.formatCurrency(detail.product.price)}</h4>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr>
-                                        <c:set var="quantity" value="${orderDetailDAO.sumOrderDetailsQuantityByOrderId(order.orderId)}"/>
-                                        <div class="quantityTotalPrices">
-                                            <div class="quantity">
-                                                <p>${quantity} sản phẩm</p>
-                                            </div>
-                                            <div class="totalPrice">
-                                                <p style="color: #ff0018; font-size: 25px; font-weight: bold">${FormatCurrency.formatCurrency(order.totalPrice)}</p>
-                                            </div>
-                                        </div>
-                                        <hr>
 
-                                        <hr>
-                                        <div class="button">
-                                            <div class="statusOrder">
-                                                <!-- Trạng thái hiển thị là "Đã bị thay đổi" -->
-                                                <h3 style="color: #ef8640; font-size: 22px; font-weight: bold">Đã bị thay đổi <i style="color: #ef8640" class="fa-solid fa-times"></i></h3>
-                                            </div>
-                                            <div class="detailOrder">
-                                                <button class="badge bg-warning me-1 CancelOrderBt"
-                                                        style="font-size: 22px; border: none; width: auto; color: white"
-                                                >
-                                                    Xác nhận lại
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </c:forEach>
-                            </div>
                             <div id="StausLayHang" class="container tab-pane fade">
                                 <c:set var="statusLayHang" value="2"/>
                                 <c:set var="statusYeuCauHuy" value="5"/>
@@ -594,7 +529,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -644,34 +579,51 @@
                                             <div class="detailOrder">
                                                 <c:choose>
                                                     <c:when test="${order.status.statusId == 2}">
+                                                        <!-- Hiển thị chỉ nút hủy -->
                                                         <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
                                                         <div class="overlay" style="display:none;"></div>
                                                         <div class="reasonCancel" style="display:none;">
-                                                            <div class="re">
-                                                                <div class="closeReason"><i class="fa-solid fa-xmark"></i></div>
-                                                                <h4>Hãy chọn lý do bạn hủy đơn ${order.orderId}</h4>
-                                                                <form action="ChangeStatusOrderUser" method="post">
-                                                                    <input type="radio" id="reason1-${order.orderId}" name="reason" value="Muốn thay đổi thông tin giao hàng.">
-                                                                    <label for="reason1-${order.orderId}">Muốn thay đổi thông tin giao hàng.</label><br>
-                                                                    <input type="radio" id="reason2-${order.orderId}" name="reason" value="Muốn chọn sản phẩm khác.">
-                                                                    <label for="reason2-${order.orderId}">Muốn chọn sản phẩm khác.</label><br>
-                                                                    <input type="radio" id="reason3-${order.orderId}" name="reason" value="Không muốn mua nữa.">
-                                                                    <label for="reason3-${order.orderId}">Không muốn mua nữa.</label><br>
+                                                            <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
                                                                     <input type="hidden" name="orderId" value="${order.orderId}" />
                                                                     <input type="hidden" name="action" value="CancelOrder2" />
-                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 20px">Xác nhận</button>
+                                                                    <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
                                                                 </form>
                                                             </div>
                                                         </div>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <form action="ChangeStatusOrderUser" method="post">
-                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
-                                                            <input type="hidden" name="action" value="ReturnCancelOrder2" />
-                                                            <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
-                                                        </form>
+                                                        <c:choose>
+                                                            <c:when test="${order.statusSignature.statusSignatureId == 2}">
+                                                                <!-- Hiển thị chỉ nút hủy yêu cầu khi statusSignatureId == 2 -->
+                                                                <button class="badge bg-danger me-1 CancelOrderBt" style="font-size: 22px; border: none; width: auto">Yêu cầu hủy</button>
+                                                                <div class="overlay" style="display:none;"></div>
+                                                                <div class="reasonCancel" style="display:none;">
+                                                                    <div class="re" style="display: flex; justify-content: center; flex-direction: column; align-items: center; text-align: center;">
+                                                                        <div class="closeReason" style="align-self: flex-end;"><i class="fa-solid fa-xmark"></i></div>
+                                                                        <h4>Bạn có chắc là muốn hủy đơn hàng MD${order.orderId} không?</h4>
+                                                                        <form action="ChangeStatusOrderUser" method="post" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px">
+                                                                            <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                            <input type="hidden" name="action" value="CancelOrder1" />
+                                                                            <button type="submit" class="badge bg-success me-1" style="font-size: 30px;">Xác nhận</button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Hiển thị nút hủy yêu cầu -->
+                                                                <form action="ChangeStatusOrderUser" method="post">
+                                                                    <input type="hidden" name="orderId" value="${order.orderId}" />
+                                                                    <input type="hidden" name="action" value="ReturnCancelOrder2" />
+                                                                    <button type="submit" class="badge bg-info CancelOrderBt" style="font-size: 22px; border: none; width: auto">Hủy yêu cầu</button>
+                                                                </form>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </c:otherwise>
                                                 </c:choose>
+
 
                                             </div>
                                         </div>
@@ -681,13 +633,14 @@
                             <div id="StausGiaoHang" class="container tab-pane fade">
                                 <c:set var="statusGiaoHang" value="3"/>
                                 <c:set var="statusGiaoHangThanhCong" value="4"/>
-                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
+                                <c:set var="statusDoiData" value="13"/>
+                                <c:if test="${empty orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong,statusDoiData)}">
                                     <div class="orderEmpty">
                                         <img height="100px" width="90px" src="/img/iconorder.png">
                                         <p>Danh sách đơn hàng trống</p>
                                     </div>
                                 </c:if>
-                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong)}">
+                                <c:forEach var="order" items="${orderDAO.selectByUserIdAndStatusIds(id, statusGiaoHang,statusGiaoHangThanhCong,statusDoiData)}">
                                     <div class="fromOrder">
                                         <div class="orderDetailProduct">
                                             <c:set var="detail" value="${orderDetailDAO.selectFirstByOrderId(order.orderId)}"/>
@@ -698,7 +651,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -739,6 +692,9 @@
                                                 <c:choose>
                                                     <c:when test="${order.status.statusId == 4}">
                                                         <h3 style="color: #38bc10; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #38bc10" class="fa-solid fa-truck-ramp-box"></i></h3>
+                                                    </c:when>
+                                                    <c:when test="${order.status.statusId == 13}">
+                                                        <h3 style="color: #c30404; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #c30404" class="fa-solid fa-truck-fast"></i></h3>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <h3 style="color: #1c67d7; font-size: 22px; font-weight: bold">${order.status.statusName} <i style="color: #1c67d7" class="fa-solid fa-truck-fast"></i> </h3>
@@ -783,7 +739,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -885,7 +841,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -949,7 +905,7 @@
                                                 <div class="productName">
                                                     <div><h3>${detail.product.product_name} <span style="font-size: 20px">x ${detail.quantity}</span></h3></div>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 1}">
-                                                        <div style="color: red">${order.statusSignature.statusSignatureName}</div>
+                                                        <div style="color: #ffc107">${order.statusSignature.statusSignatureName}</div>
                                                     </c:if>
                                                     <c:if test="${order.statusSignature.statusSignatureId == 2}">
                                                         <div style="color: red">${order.statusSignature.statusSignatureName}</div>
@@ -992,12 +948,12 @@
                                         </div>
                                     </div>
                                 </c:forEach>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </section>
 
