@@ -65,7 +65,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -114,7 +114,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     updateOrderStatus(con, idImport, 13);
                 }
 
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -266,7 +266,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -330,7 +330,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -380,7 +380,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -432,7 +432,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -482,7 +482,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 3) {
                     updateOrderStatus(con, idImport, 13);
                 }
-
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -544,6 +544,7 @@ public class OrderDAO extends AbsDAO<Order>{
                 if (status == 3 && statusSignature == 2) {
                     updateOrderStatus(con, idImport, 13);
                 }
+                updateOrdersBasedOnKeyStatus();
                 User u = new UserDAO().selectById(idUser);
                 Payment pay = new PaymentDAO().selectById(idPayment);
                 StatusOrder statusOrder = new StatusOrderDAO().selectById(status);
@@ -559,6 +560,57 @@ public class OrderDAO extends AbsDAO<Order>{
 
         return orders;
     }
+    public void updateOrdersBasedOnKeyStatus() {
+        try {
+            Connection con = JDBCUtil.getConnection();
+
+            // Lấy thời gian hết hạn của key mới nhất có trạng thái "OFF"
+            String sqlOff = "SELECT expired_at FROM key_user WHERE status = 'OFF' ORDER BY expired_at DESC LIMIT 1";
+            PreparedStatement stOff = con.prepareStatement(sqlOff);
+            ResultSet rsOff = stOff.executeQuery();
+            Timestamp expiredAt = null;
+            if (rsOff.next()) {
+                expiredAt = rsOff.getTimestamp("expired_at");
+            }
+
+            // Lấy thời gian tạo của key có trạng thái "ON"
+            String sqlOn = "SELECT create_at FROM key_user WHERE status = 'ON' ORDER BY create_at ASC LIMIT 1";
+            PreparedStatement stOn = con.prepareStatement(sqlOn);
+            ResultSet rsOn = stOn.executeQuery();
+            Timestamp createAt = null;
+            if (rsOn.next()) {
+                createAt = rsOn.getTimestamp("create_at");
+            }
+
+            // Kiểm tra nếu cả hai thời điểm được tìm thấy
+            if (expiredAt != null && createAt != null) {
+                // Tìm các đơn hàng có ngày đặt trong khoảng thời gian từ expiredAt đến createAt
+                String sqlOrders = "SELECT order_id FROM orders WHERE booking_date BETWEEN ? AND ?";
+                PreparedStatement stOrders = con.prepareStatement(sqlOrders);
+                stOrders.setTimestamp(1, expiredAt);
+                stOrders.setTimestamp(2, createAt);
+                ResultSet rsOrders = stOrders.executeQuery();
+
+                // Cập nhật trạng thái của các đơn hàng tìm được thành `status6`
+                String updateSql = "UPDATE orders SET status_id = 6 WHERE order_id = ?";
+                PreparedStatement stUpdate = con.prepareStatement(updateSql);
+                while (rsOrders.next()) {
+                    int orderId = rsOrders.getInt("order_id");
+                    stUpdate.setInt(1, orderId);
+                    stUpdate.executeUpdate();
+                }
+
+                System.out.println("Cap nhat trang thai thanh cong!");
+            } else {
+                System.out.println("Không tìm thấy thời gian hết hạn hoặc thời gian tạo khóa phù hợp.");
+            }
+
+            // Đóng kết nối
+            JDBCUtil.closeConnection(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private int checkChangeDatabase(Connection con, int userId, int orderId, int currentStatus) throws SQLException {
         // Nếu trạng thái đơn hàng là 6, bỏ qua kiểm tra
@@ -572,12 +624,14 @@ public class OrderDAO extends AbsDAO<Order>{
             String calculatedHash = Hash.calculateHash(serializedData.getBytes(StandardCharsets.UTF_8));
 
             // Truy vấn để lấy chữ ký và khóa công khai
+
             String sql = """
         SELECT os.signature, ku.public_key
         FROM order_signatures os
         LEFT JOIN key_user ku ON ku.user_id = ? AND ku.status = 'ON'
         WHERE os.order_id = ?
         """;
+
 
             try (PreparedStatement st = con.prepareStatement(sql)) {
                 st.setInt(1, userId);
@@ -587,6 +641,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     if (rs.next()) {
                         String signature = rs.getString("signature");
                         String publicKey = rs.getString("public_key");
+
                         // Nếu không có chữ ký
                         if (signature == null) {
                             // Nếu hash đúng trở lại, trạng thái = 1
@@ -780,7 +835,7 @@ public class OrderDAO extends AbsDAO<Order>{
             updateSt.executeUpdate();
         }
     }
-//     Hàm tiện ích để cập nhật trạng thái đơn hàng
+
     private void updateOrderStatus(Connection con, int orderId, int newStatus) throws SQLException {
         String updateSql = "UPDATE orders SET status_id = ? WHERE order_id = ?";
         try (PreparedStatement updateSt = con.prepareStatement(updateSql)) {
