@@ -289,13 +289,17 @@
                             <div class="checkout__input__checkbox" style="display: flex;">
                                 <label style="margin-left: -15px">Phương thức thanh toán</label>
                                 <div style="margin-left: 20px; margin-top: -10px">
-
                                     <select name="payment" id="payment" title="Select Category">
                                         <c:forEach items="${paymentDAO.selectAll()}" var="c">
-                                            <option value="${c.paymentId}">${c.paymentName}</option>
+                                            <!-- Kiểm tra nếu paymentId là 2, thì thêm thuộc tính selected -->
+                                            <option value="${c.paymentId}"
+                                                    <c:if test="${c.paymentId == 2}">selected</c:if>>
+                                                    ${c.paymentName}
+                                            </option>
                                         </c:forEach>
                                     </select>
                                 </div>
+
                             </div>
                             <button type="submit" class="site-btn" id="submitBtn">Đặt hàng</button>
                         </div>

@@ -219,9 +219,7 @@ public class CheckoutController extends HttpServlet {
 
                 // Xóa giỏ hàng sau khi đặt hàng thành công
                 cart.clearCart();
-                if (paymentId == 1) {
-                    request.getRequestDispatcher("/WEB-INF/book/Vnpay.jsp").forward(request, response);
-                } else {
+
                     // Xóa các thông tin liên quan đến coupon và giảm giá trong session
                     session.removeAttribute("appliedCouponCode");
                     session.removeAttribute("discountValue");
@@ -232,7 +230,7 @@ public class CheckoutController extends HttpServlet {
                     // Chuyển hướng đến trang xác nhận đơn hàng
                     response.sendRedirect(request.getContextPath() + "/verify-order?OrderIdVerify=" + order.getOrderId());
                     return;
-                }
+
 
             }
 

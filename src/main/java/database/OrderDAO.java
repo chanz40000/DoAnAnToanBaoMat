@@ -600,7 +600,7 @@ public class OrderDAO extends AbsDAO<Order>{
                     stUpdate.executeUpdate();
                 }
 
-                System.out.println("Cap nhat trang thai thanh cong!");
+
             } else {
                 System.out.println("Không tìm thấy thời gian hết hạn hoặc thời gian tạo khóa phù hợp.");
             }
@@ -711,66 +711,61 @@ public class OrderDAO extends AbsDAO<Order>{
 
     // Phương thức kiểm tra và cập nhật signature_status_id
     private int checkAndUpdateSignatureStatus(Connection con, int orderId, int currentStatusSignature) throws SQLException {
-        // Kiểm tra nếu trạng thái hiện tại là 3
+        // Xử lý khi trạng thái hiện tại là 3 (đã ký)
         if (currentStatusSignature == 3) {
-            // Truy vấn kiểm tra xem có bản ghi chữ ký nào cho đơn hàng không
-            String checkExistSql = "SELECT COUNT(*) AS count FROM order_signatures WHERE order_id = ?";
-            try (PreparedStatement checkExistSt = con.prepareStatement(checkExistSql)) {
-                checkExistSt.setInt(1, orderId);
-                try (ResultSet checkExistRs = checkExistSt.executeQuery()) {
-                    if (checkExistRs.next() && checkExistRs.getInt("count") == 0) {
-                        // Không có bản ghi chữ ký -> cập nhật trạng thái về 2
-                        updateOrderStatusSignature(con, orderId, 2);
-                        return 2;
-                    }
-                }
-            }
-
-            // Kiểm tra trạng thái từng chữ ký (is_signature_verified)
-            String checkSql = "SELECT is_signature_verified FROM order_signatures WHERE order_id = ?";
+            // Kiểm tra chữ ký có tồn tại không và trạng thái xác minh
+            String checkSql = "SELECT signature, is_signature_verified FROM order_signatures WHERE order_id = ?";
             try (PreparedStatement checkSt = con.prepareStatement(checkSql)) {
                 checkSt.setInt(1, orderId);
                 try (ResultSet checkRs = checkSt.executeQuery()) {
+                    boolean hasSignature = false; // Biến kiểm tra sự tồn tại của chữ ký
                     while (checkRs.next()) {
-                        if (!checkRs.getBoolean("is_signature_verified")) {
-                            // Có ít nhất một chữ ký chưa xác minh -> cập nhật trạng thái về 2
-                            updateOrderStatusSignature(con, orderId, 2);
+                        String signature = checkRs.getString("signature");
+                        hasSignature = (signature != null); // Nếu chữ ký khác null thì đã có chữ ký
+                        if (!checkRs.getBoolean("is_signature_verified")) { // Nếu chữ ký chưa được xác minh
+                            updateOrderStatusSignature(con, orderId, 2); // Cập nhật trạng thái về 2
                             return 2;
                         }
                     }
-                }
-            }
-        }
-        // Kiểm tra nếu trạng thái hiện tại là 1
-        else if (currentStatusSignature == 1) {
-            // Truy vấn kiểm tra chữ ký
-            String checkSql = "SELECT is_signature_verified FROM order_signatures WHERE order_id = ?";
-            try (PreparedStatement checkSt = con.prepareStatement(checkSql)) {
-                checkSt.setInt(1, orderId);
-                try (ResultSet checkRs = checkSt.executeQuery()) {
-                    boolean hasSignatures = false; // Biến kiểm tra có bản ghi hay không
-                    boolean allSignaturesVerified = true; // Biến kiểm tra tất cả chữ ký đã xác minh
-
-                    while (checkRs.next()) {
-                        hasSignatures = true;
-                        if (!checkRs.getBoolean("is_signature_verified")) {
-                            allSignaturesVerified = false; // Phát hiện chữ ký chưa xác minh
-                            break;
-                        }
-                    }
-
-                    if (hasSignatures && allSignaturesVerified) {
-                        // Tất cả chữ ký đã được xác minh -> trạng thái đã bị chỉnh sửa
+                    // Nếu không có chữ ký nào -> cập nhật trạng thái về 2
+                    if (!hasSignature) {
                         updateOrderStatusSignature(con, orderId, 2);
                         return 2;
                     }
                 }
             }
         }
+        // Xử lý khi trạng thái hiện tại là 1 (chưa ký)
+        else if (currentStatusSignature == 1) {
+            // Kiểm tra tất cả chữ ký đã được xác minh chưa
+            String checkSql = "SELECT signature, is_signature_verified FROM order_signatures WHERE order_id = ?";
+            try (PreparedStatement checkSt = con.prepareStatement(checkSql)) {
+                checkSt.setInt(1, orderId);
+                try (ResultSet checkRs = checkSt.executeQuery()) {
+                    boolean hasSignature = false; // Kiểm tra có chữ ký nào hay không
+                    boolean allSignaturesVerified = true; // Giả định tất cả chữ ký đã được xác minh
 
-        // Không thay đổi trạng thái
+                    while (checkRs.next()) {
+                        String signature = checkRs.getString("signature");
+                        hasSignature = (signature != null);
+                        if (signature != null && !checkRs.getBoolean("is_signature_verified")) { // Nếu có chữ ký chưa xác minh
+                            allSignaturesVerified = false; // Ghi nhận là có chữ ký chưa xác minh
+                            break; // Thoát vòng lặp ngay khi phát hiện
+                        }
+                    }
+
+                    // Nếu có chữ ký và tất cả đã được xác minh -> cập nhật trạng thái
+                    if (hasSignature && allSignaturesVerified) {
+                        updateOrderStatusSignature(con, orderId, 2);
+                        return 2;
+                    }
+                }
+            }
+        }
+        // Trả về trạng thái hiện tại nếu không có thay đổi
         return currentStatusSignature;
     }
+
 
     public String getSerializedDataForOrder(int orderId) throws SQLException {
         StringBuilder serializedData = new StringBuilder();
